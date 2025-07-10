@@ -51,4 +51,19 @@ pub mod smart_contracts {
         ctx.accounts.mark_task_complete()?;
         Ok(())
     }
+
+    pub fn submit_response(ctx: Context<SubmitResponse>, payload: Vec<u8>) -> Result<()> {
+        ctx.accounts.submit_response(payload)?;
+        Ok(())
+    }
+
+    pub fn verify_response(ctx: Context<VerifyResponse>) -> Result<()> {
+        ctx.accounts.verify_response()?;
+        Ok(())
+    }
+
+    pub fn quorum_reached(ctx: Context<QuorumReached>) -> Result<()> {
+        ctx.accounts.quorum_reached()?;
+        Ok(())
+    }
 }

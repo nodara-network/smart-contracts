@@ -10,4 +10,6 @@ pub enum ErrorCode {
     DeadlinePassed,
     #[msg("Not enough valid responses yet.")]
     NotEnoughResponses,
+    #[msg("Response already exists.")]
+    ResponseAlreadyExists,
 }
