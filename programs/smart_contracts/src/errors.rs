@@ -12,4 +12,6 @@ pub enum ErrorCode {
     NotEnoughResponses,
     #[msg("Response already exists.")]
     ResponseAlreadyExists,
+    #[msg("Vault does not have enough balance.")]
+    InsufficientVaultBalance,
 }

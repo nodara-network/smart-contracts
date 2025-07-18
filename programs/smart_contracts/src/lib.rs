@@ -66,4 +66,16 @@ pub mod smart_contracts {
         ctx.accounts.quorum_reached()?;
         Ok(())
     }
+
+    pub fn deposit_funds(ctx: Context<DepositFunds>, amount: u64) -> Result<()> {
+        ctx.accounts.deposit_funds(amount)
+    }
+
+    pub fn disburse_rewards(ctx: Context<DisburseRewards>, amount: u64) -> Result<()> {
+        ctx.accounts.disburse_rewards(amount)
+    }
+
+    pub fn refund_remaining(ctx: Context<RefundRemaining>) -> Result<()> {
+        ctx.accounts.refund_remaining()
+    }
 }
