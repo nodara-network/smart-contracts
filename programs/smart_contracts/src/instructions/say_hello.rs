@@ -5,7 +5,7 @@ pub struct SayHello {}
 
 impl SayHello {
     pub fn say_hello(&mut self) -> Result<()> {
-      msg!("Hello Anchor!!");
-      Ok(())
+        msg!("Hello Anchor!!");
+        Ok(())
     }
 }
