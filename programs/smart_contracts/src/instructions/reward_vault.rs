@@ -37,7 +37,7 @@ impl<'info> DepositFunds<'info> {
         **vault.to_account_info().try_borrow_mut_lamports()? += amount;
         **creator.to_account_info().try_borrow_mut_lamports()? -= amount;
 
-        vault.task = self.task_account.key();
+        vault.task_bump = self.task_account.bump;
         vault.balance = amount;
         vault.bump = vault.bump; // Use the mutable reference to vault instead of self.reward_vault
 

@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{constants::MAX_INPUT_SIZE, errors::ErrorCode, states::TaskAccount, types::TaskType};
+use crate::{errors::ErrorCode, states::TaskAccount};
 
 #[derive(Accounts)]
 #[instruction(task_id: u64)]
@@ -51,25 +51,21 @@ impl<'info> CreateTask<'info> {
     pub fn create_task(
         &mut self,
         task_id: u64,
-        task_type: TaskType,
-        input_data: Vec<u8>,
         reward_per_response: u64,
-        max_responses: u8,
+        max_responses: u16,
         deadline: i64,
+        cid: String,
     ) -> Result<()> {
-        require!(input_data.len() <= MAX_INPUT_SIZE, ErrorCode::InputTooLarge);
-
         self.task_account.set_inner(TaskAccount {
             task_id,
             creator: self.creator.key(),
-            task_type,
-            input_data,
             reward_per_response,
             max_responses,
             deadline,
             responses_received: 0,
             is_complete: false,
             bump: self.task_account.bump,
+            cid,
         });
 
         Ok(())
