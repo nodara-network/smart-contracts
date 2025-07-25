@@ -1,5 +1,4 @@
 use crate::{
-    constants::MAX_PAYLOAD_SIZE,
     errors::ErrorCode,
     states::{response_accounts::*, task_accounts::*},
 };
@@ -50,18 +49,16 @@ pub struct QuorumReached<'info> {
 }
 
 impl<'info> SubmitResponse<'info> {
-    pub fn submit_response(&mut self, payload: Vec<u8>) -> Result<()> {
-        require!(payload.len() <= MAX_PAYLOAD_SIZE, ErrorCode::InputTooLarge);
-
+    pub fn submit_response(&mut self, cid: String) -> Result<()> {
         require!(
             Clock::get()?.unix_timestamp < self.task_account.deadline,
             ErrorCode::DeadlinePassed
         );
 
         self.response_account.set_inner(ResponseAccount {
-            task: self.task_account.key(),
+            task_bump: self.task_account.bump,
             responder: self.responder.key(),
-            payload,
+            cid,
             timestamp: Clock::get()?.unix_timestamp,
             is_verified: true,
             bump: self.response_account.bump,
