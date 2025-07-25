@@ -1,5 +1,6 @@
 #![allow(unexpected_cfgs)]
 use anchor_lang::prelude::*;
+use ephemeral_rollups_sdk::anchor::ephemeral;
 
 declare_id!("Afja4Q8urL5j8Hn3PpCkgP2Tgpe8xtp98khPmAVZF5Vk");
 
@@ -13,6 +14,7 @@ pub use instructions::*;
 pub use states::*;
 pub use types::*;
 
+#[ephemeral]
 #[program]
 pub mod smart_contracts {
     use super::*;
