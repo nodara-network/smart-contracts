@@ -41,6 +41,8 @@ impl<'info> DepositFunds<'info> {
         vault.balance = amount;
         vault.bump = vault.bump; // Use the mutable reference to vault instead of self.reward_vault
 
+        // TODO: Set MagicBlock as delegate after deposit (off-chain handles responses)
+
         Ok(())
     }
 }
@@ -66,6 +68,8 @@ impl<'info> DisburseRewards<'info> {
         let vault = &mut self.reward_vault;
 
         require!(vault.balance >= amount, ErrorCode::InsufficientVaultBalance);
+
+        // TODO: Require signer to be MagicBlock delegate before disbursing
 
         **self.recipient.try_borrow_mut_lamports()? += amount;
         **vault.to_account_info().try_borrow_mut_lamports()? -= amount;
@@ -96,6 +100,8 @@ pub struct RefundRemaining<'info> {
 impl<'info> RefundRemaining<'info> {
     pub fn refund_remaining(&mut self) -> Result<()> {
         let vault = &mut self.reward_vault;
+
+        // TODO: Optionally require MagicBlock (if delegate-based cancel happens)
 
         **self.creator.try_borrow_mut_lamports()? += vault.balance;
         **vault.to_account_info().try_borrow_mut_lamports()? -= vault.balance;

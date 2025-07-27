@@ -38,16 +38,6 @@ pub struct VerifyResponse<'info> {
     pub signer: Signer<'info>,
 }
 
-#[derive(Accounts)]
-pub struct QuorumReached<'info> {
-    #[account(
-        mut,
-        seeds = [b"task", task_account.creator.as_ref(), &task_account.task_id.to_le_bytes()],
-        bump = task_account.bump
-    )]
-    pub task_account: Account<'info, TaskAccount>,
-}
-
 impl<'info> SubmitResponse<'info> {
     pub fn submit_response(&mut self, cid: String) -> Result<()> {
         require!(
@@ -77,22 +67,6 @@ impl<'info> VerifyResponse<'info> {
         let response = &mut self.response_account;
 
         response.is_verified = true;
-
-        Ok(())
-    }
-}
-
-impl<'info> QuorumReached<'info> {
-    pub fn quorum_reached(&mut self) -> Result<()> {
-        let task = &mut self.task_account;
-
-        require!(!task.is_complete, ErrorCode::TaskAlreadyComplete);
-        require!(
-            task.responses_received >= task.max_responses,
-            ErrorCode::NotEnoughResponses
-        );
-
-        task.is_complete = true;
 
         Ok(())
     }
