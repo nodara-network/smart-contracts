@@ -1,6 +1,9 @@
 use anchor_lang::prelude::*;
 
-use crate::{errors::{ErrorCode, TaskError}, RewardVaultAccount, TaskAccount};
+use crate::{
+    errors::{ErrorCode, TaskError},
+    RewardVaultAccount, TaskAccount,
+};
 
 /// Creates a new task and stores it in a PDA.
 #[derive(Accounts)]
@@ -68,7 +71,7 @@ impl<'info> CreateTask<'info> {
         max_responses: u16,
         deadline: i64,
         cid: String,
-        bumps: CreateTaskBumps
+        bumps: CreateTaskBumps,
     ) -> Result<()> {
         // Ensure the task ID is non-zero
         if task_id == 0 {
@@ -109,7 +112,10 @@ impl<'info> CreateTask<'info> {
             cid,
         });
 
-        msg!("Task created successfully {}", self.task_account.key().to_string());
+        msg!(
+            "Task created successfully {}",
+            self.task_account.key().to_string()
+        );
 
         Ok(())
     }
@@ -118,6 +124,10 @@ impl<'info> CreateTask<'info> {
 impl<'info> CancelTask<'info> {
     pub fn cancel_task(&mut self) -> Result<()> {
         let task = &mut self.task_account;
+
+        if task.creator != self.creator.key() {
+            return Err(TaskError::InvalidCreator.into());
+        }
 
         require!(!task.is_complete, ErrorCode::TaskAlreadyComplete); // Must not be complete
         require!(
