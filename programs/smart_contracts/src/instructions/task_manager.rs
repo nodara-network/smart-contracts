@@ -108,6 +108,8 @@ impl<'info> CreateTask<'info> {
             cid,
         });
 
+        msg!("Task created successfully {}", self.task_account.key().to_string());
+
         Ok(())
     }
 }

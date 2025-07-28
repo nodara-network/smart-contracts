@@ -33,3 +33,18 @@ pub enum TaskError {
     #[msg("CID cannot be empty.")]
     InvalidCID,
 }
+
+#[error_code]
+pub enum RewardError {
+    #[msg("Creator has insufficient funds to deposit.")]
+    InsufficientFunds,
+
+    #[msg("Failed to transfer lamports.")]
+    TransferFailed,
+}
+
+#[error_code]
+pub enum MagicblockError {
+    #[msg("Failed to delegate task authority.")]
+    DelegateFailed,
+}
