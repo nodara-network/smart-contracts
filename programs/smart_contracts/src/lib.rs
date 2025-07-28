@@ -19,11 +19,6 @@ pub use types::*;
 pub mod smart_contracts {
     use super::*;
 
-    pub fn say_hello(ctx: Context<SayHello>) -> Result<()> {
-        ctx.accounts.say_hello()?;
-        Ok(())
-    }
-
     // creator calls this to create a task
     pub fn create_task(
         ctx: Context<CreateTask>,
@@ -62,14 +57,9 @@ pub mod smart_contracts {
         Ok(())
     }
 
-    pub fn quorum_reached(ctx: Context<QuorumReached>) -> Result<()> {
-        ctx.accounts.quorum_reached()?;
-        Ok(())
-    }
-
     // creator
-    pub fn deposit_funds(ctx: Context<DepositFunds>, amount: u64) -> Result<()> {
-        ctx.accounts.deposit_funds(amount)
+    pub fn deposit_funds(ctx: Context<DepositFunds>, task_id: u64, amount: u64) -> Result<()> {
+        ctx.accounts.deposit_funds(task_id, amount)
     }
 
     // admin

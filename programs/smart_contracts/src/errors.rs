@@ -15,3 +15,36 @@ pub enum ErrorCode {
     #[msg("Vault does not have enough balance.")]
     InsufficientVaultBalance,
 }
+
+#[error_code]
+pub enum TaskError {
+    #[msg("Task ID must be non-zero.")]
+    InvalidTaskId,
+
+    #[msg("Reward per response must be greater than zero.")]
+    InvalidReward,
+
+    #[msg("Max responses must be greater than zero.")]
+    InvalidMaxResponses,
+
+    #[msg("Deadline must be in the future.")]
+    InvalidDeadline,
+
+    #[msg("CID cannot be empty.")]
+    InvalidCID,
+}
+
+#[error_code]
+pub enum RewardError {
+    #[msg("Creator has insufficient funds to deposit.")]
+    InsufficientFunds,
+
+    #[msg("Failed to transfer lamports.")]
+    TransferFailed,
+}
+
+#[error_code]
+pub enum MagicblockError {
+    #[msg("Failed to delegate task authority.")]
+    DelegateFailed,
+}
