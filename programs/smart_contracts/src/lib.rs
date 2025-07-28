@@ -58,8 +58,8 @@ pub mod smart_contracts {
     }
 
     // creator
-    pub fn deposit_funds(ctx: Context<DepositFunds>, amount: u64) -> Result<()> {
-        ctx.accounts.deposit_funds(amount)
+    pub fn deposit_funds(ctx: Context<DepositFunds>, task_id: u64, amount: u64) -> Result<()> {
+        ctx.accounts.deposit_funds(task_id, amount)
     }
 
     // admin

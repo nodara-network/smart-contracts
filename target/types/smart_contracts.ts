@@ -187,13 +187,11 @@ export type SmartContracts = {
               },
               {
                 "kind": "account",
-                "path": "task_account.creator",
-                "account": "taskAccount"
+                "path": "creator"
               },
               {
-                "kind": "account",
-                "path": "task_account.task_id",
-                "account": "taskAccount"
+                "kind": "arg",
+                "path": "taskId"
               }
             ]
           }
@@ -231,6 +229,10 @@ export type SmartContracts = {
         }
       ],
       "args": [
+        {
+          "name": "taskId",
+          "type": "u64"
+        },
         {
           "name": "amount",
           "type": "u64"
@@ -577,8 +579,33 @@ export type SmartContracts = {
   "errors": [
     {
       "code": 6000,
-      "name": "delegateFailed",
-      "msg": "Failed to delegate task authority."
+      "name": "inputTooLarge",
+      "msg": "Input data too large."
+    },
+    {
+      "code": 6001,
+      "name": "taskAlreadyComplete",
+      "msg": "Task already marked complete."
+    },
+    {
+      "code": 6002,
+      "name": "deadlinePassed",
+      "msg": "Deadline has already passed."
+    },
+    {
+      "code": 6003,
+      "name": "notEnoughResponses",
+      "msg": "Not enough valid responses yet."
+    },
+    {
+      "code": 6004,
+      "name": "responseAlreadyExists",
+      "msg": "Response already exists."
+    },
+    {
+      "code": 6005,
+      "name": "insufficientVaultBalance",
+      "msg": "Vault does not have enough balance."
     }
   ],
   "types": [

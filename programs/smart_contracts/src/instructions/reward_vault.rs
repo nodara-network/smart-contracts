@@ -5,10 +5,11 @@ use crate::{
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
+#[instruction(task_id: u64)]
 pub struct DepositFunds<'info> {
     #[account(
         mut,
-        seeds = [b"task", task_account.creator.key().as_ref(), &task_account.task_id.to_le_bytes()],
+        seeds = [b"task", creator.key().as_ref(), task_id.to_le_bytes().as_ref()],
         bump = task_account.bump
     )]
     pub task_account: Account<'info, TaskAccount>,
@@ -29,7 +30,7 @@ pub struct DepositFunds<'info> {
 }
 
 impl<'info> DepositFunds<'info> {
-    pub fn deposit_funds(&mut self, amount: u64) -> Result<()> {
+    pub fn deposit_funds(&mut self, task_id: u64, amount: u64) -> Result<()> {
         let vault_info = self.reward_vault.to_account_info();
         let creator_info = self.creator.to_account_info();
 
