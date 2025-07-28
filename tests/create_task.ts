@@ -12,7 +12,11 @@ describe("nodara - create_task", () => {
 
   const generateTaskPDA = async (taskId: anchor.BN) => {
     const [taskPDA, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from("task"), wallet.publicKey.toBuffer(), Buffer.from(taskId.toArray("le", 8))],
+      [
+        Buffer.from("task"),
+        wallet.publicKey.toBuffer(),
+        Buffer.from(taskId.toArray("le", 8)),
+      ],
       program.programId
     );
     return { taskPDA, bump };
@@ -33,24 +37,18 @@ describe("nodara - create_task", () => {
       deadline,
       cid,
       taskPDA,
-      bump
+      bump,
     };
   };
 
   it("Creates a task successfully", async () => {
-    const {
-      taskId,
-      rewardPerResponse,
-      maxResponses,
-      deadline,
-      cid,
-      taskPDA
-    } = await validTaskInput();
+    const { taskId, rewardPerResponse, maxResponses, deadline, cid, taskPDA } =
+      await validTaskInput();
 
     await program.methods
       .createTask(taskId, rewardPerResponse, maxResponses, deadline, cid)
       .accounts({
-        creator: wallet.publicKey
+        creator: wallet.publicKey,
       })
       .rpc();
 
@@ -58,7 +56,10 @@ describe("nodara - create_task", () => {
 
     assert.strictEqual(task.taskId.toNumber(), taskId.toNumber());
     assert.strictEqual(task.creator.toBase58(), wallet.publicKey.toBase58());
-    assert.strictEqual(task.rewardPerResponse.toNumber(), rewardPerResponse.toNumber());
+    assert.strictEqual(
+      task.rewardPerResponse.toNumber(),
+      rewardPerResponse.toNumber()
+    );
     assert.strictEqual(task.maxResponses, maxResponses);
     assert.strictEqual(task.responsesReceived, 0);
     assert.strictEqual(task.isComplete, false);
@@ -67,12 +68,8 @@ describe("nodara - create_task", () => {
   });
 
   it("Fails with task_id = 0", async () => {
-    const {
-      rewardPerResponse,
-      maxResponses,
-      deadline,
-      cid,
-    } = await validTaskInput();
+    const { rewardPerResponse, maxResponses, deadline, cid } =
+      await validTaskInput();
 
     const taskId = new anchor.BN(0);
 
@@ -91,12 +88,7 @@ describe("nodara - create_task", () => {
   });
 
   it("Fails with reward_per_response = 0", async () => {
-    const {
-      taskId,
-      maxResponses,
-      deadline,
-      cid,
-    } = await validTaskInput();
+    const { taskId, maxResponses, deadline, cid } = await validTaskInput();
 
     try {
       await program.methods
@@ -112,12 +104,7 @@ describe("nodara - create_task", () => {
   });
 
   it("Fails with max_responses = 0", async () => {
-    const {
-      taskId,
-      rewardPerResponse,
-      deadline,
-      cid,
-    } = await validTaskInput();
+    const { taskId, rewardPerResponse, deadline, cid } = await validTaskInput();
 
     try {
       await program.methods
@@ -133,12 +120,8 @@ describe("nodara - create_task", () => {
   });
 
   it("Fails with deadline in the past", async () => {
-    const {
-      taskId,
-      rewardPerResponse,
-      maxResponses,
-      cid,
-    } = await validTaskInput();
+    const { taskId, rewardPerResponse, maxResponses, cid } =
+      await validTaskInput();
 
     const pastDeadline = new anchor.BN(Math.floor(Date.now() / 1000 - 60));
 
@@ -156,12 +139,8 @@ describe("nodara - create_task", () => {
   });
 
   it("Fails with empty CID", async () => {
-    const {
-      taskId,
-      rewardPerResponse,
-      maxResponses,
-      deadline,
-    } = await validTaskInput();
+    const { taskId, rewardPerResponse, maxResponses, deadline } =
+      await validTaskInput();
 
     try {
       await program.methods
@@ -207,7 +186,9 @@ describe("nodara - create_task", () => {
           creator: wallet.publicKey,
         })
         .rpc();
-      expect.fail("Expected failure due to duplicate task account, but it succeeded.");
+      expect.fail(
+        "Expected failure due to duplicate task account, but it succeeded."
+      );
     } catch (err) {
       expect(err.message).to.match(/already.*in use/i);
     }

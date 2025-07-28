@@ -32,6 +32,9 @@ pub enum TaskError {
 
     #[msg("CID cannot be empty.")]
     InvalidCID,
+
+    #[msg("Invalid creator.")]
+    InvalidCreator,
 }
 
 #[error_code]
@@ -42,7 +45,6 @@ pub enum RewardError {
     #[msg("Invalid deposit amount")]
     InvalidDepositAmount,
 }
-
 
 #[error_code]
 pub enum MagicblockError {
