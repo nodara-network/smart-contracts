@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{errors::ErrorCode, RewardVaultAccount, TaskAccount};
+use crate::{errors::{ErrorCode, TaskError}, RewardVaultAccount, TaskAccount};
 
 /// Creates a new task and stores it in a PDA.
 #[derive(Accounts)]
@@ -69,16 +69,43 @@ impl<'info> CreateTask<'info> {
         deadline: i64,
         cid: String,
     ) -> Result<()> {
+        // Ensure the task ID is non-zero
+        if task_id == 0 {
+            return Err(TaskError::InvalidTaskId.into());
+        }
+
+        // Ensure the reward is greater than zero
+        if reward_per_response == 0 {
+            return Err(TaskError::InvalidReward.into());
+        }
+
+        // Ensure max responses is a positive number
+        if max_responses == 0 {
+            return Err(TaskError::InvalidMaxResponses.into());
+        }
+
+        // Ensure deadline is in the future
+        let current_timestamp = Clock::get()?.unix_timestamp;
+        if deadline <= current_timestamp {
+            return Err(TaskError::InvalidDeadline.into());
+        }
+
+        // Ensure CID is not empty
+        if cid.trim().is_empty() {
+            return Err(TaskError::InvalidCID.into());
+        }
+
+        // Initialize the task account
         self.task_account.set_inner(TaskAccount {
-            task_id,                      // Task ID
-            creator: self.creator.key(),  // Creator pubkey
-            reward_per_response,          // Reward per response
-            max_responses,                // Max responses allowed
-            deadline,                     // Task deadline
-            responses_received: 0,        // Start at 0
-            is_complete: false,           // Not complete
-            bump: self.task_account.bump, // Task bump
-            cid,                          // Task CID
+            task_id,
+            creator: self.creator.key(),
+            reward_per_response,
+            max_responses,
+            deadline,
+            responses_received: 0,
+            is_complete: false,
+            bump: self.task_account.bump,
+            cid,
         });
 
         Ok(())
@@ -119,7 +146,7 @@ impl<'info> MarkTaskComplete<'info> {
         task.is_complete = true; // Mark complete
 
         // TODO: May be bypassed if completion happens via MagicBlock
-        
+
         Ok(())
     }
 }

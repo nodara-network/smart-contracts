@@ -15,3 +15,21 @@ pub enum ErrorCode {
     #[msg("Vault does not have enough balance.")]
     InsufficientVaultBalance,
 }
+
+#[error_code]
+pub enum TaskError {
+    #[msg("Task ID must be non-zero.")]
+    InvalidTaskId,
+
+    #[msg("Reward per response must be greater than zero.")]
+    InvalidReward,
+
+    #[msg("Max responses must be greater than zero.")]
+    InvalidMaxResponses,
+
+    #[msg("Deadline must be in the future.")]
+    InvalidDeadline,
+
+    #[msg("CID cannot be empty.")]
+    InvalidCID,
+}
