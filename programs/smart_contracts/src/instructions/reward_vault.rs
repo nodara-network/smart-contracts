@@ -2,7 +2,10 @@ use crate::{
     errors::{ErrorCode, RewardError},
     states::{reward_accounts::*, task_accounts::*},
 };
-use anchor_lang::prelude::*;
+use anchor_lang::{
+    prelude::*,
+    solana_program::{program::invoke, system_instruction::transfer},
+};
 
 #[derive(Accounts)]
 #[instruction(task_id: u64)]
@@ -10,7 +13,7 @@ pub struct DepositFunds<'info> {
     #[account(
         mut,
         seeds = [b"task", creator.key().as_ref(), task_id.to_le_bytes().as_ref()],
-        bump = task_account.bump
+        bump
     )]
     pub task_account: Account<'info, TaskAccount>,
 
@@ -30,62 +33,46 @@ pub struct DepositFunds<'info> {
 }
 
 impl<'info> DepositFunds<'info> {
-    pub fn deposit_funds(&mut self, task_id: u64, amount: u64) -> Result<()> {
-        let vault_info = self.reward_vault.to_account_info();
-        let creator_info = self.creator.to_account_info();
-
-        let mut vault_lamports = match vault_info.try_borrow_mut_lamports() {
-            Ok(lamports) => lamports,
-            Err(_) => {
-                msg!("Failed to borrow vault lamports");
-                return Err(RewardError::TransferFailed.into());
-            }
-        };
-
-        let mut creator_lamports = match creator_info.try_borrow_mut_lamports() {
-            Ok(lamports) => lamports,
-            Err(_) => {
-                msg!("Failed to borrow creator lamports");
-                return Err(RewardError::TransferFailed.into());
-            }
-        };
-
-        if **creator_lamports < amount {
-            msg!("Insufficient funds in creator account");
-            return Err(RewardError::InsufficientFunds.into());
+    pub fn deposit_funds(
+        &mut self,
+        _task_id: u64,
+        amount: u64,
+        bumps: DepositFundsBumps,
+    ) -> Result<()> {
+        if amount == 0 {
+            msg!("Attempted to deposit zero lamports");
+            return Err(RewardError::InvalidDepositAmount.into());
         }
 
-        let new_creator_balance = match (**creator_lamports).checked_sub(amount) {
-            Some(value) => value,
-            None => {
-                msg!("Underflow when subtracting from creator lamports");
-                return Err(RewardError::TransferFailed.into());
-            }
-        };
+        // ? - exit early from the function
+        invoke(
+            &transfer(&self.creator.key(), &self.reward_vault.key(), amount),
+            &[
+                self.creator.to_account_info(),
+                self.reward_vault.to_account_info(),
+                self.system_program.to_account_info(),
+            ],
+        )
+        .map_err(|e| {
+            msg!("Failed to transfer lamports via CPI: {}", e);
+            RewardError::TransferFailed
+        })?;
 
-        let new_vault_balance = match (**vault_lamports).checked_add(amount) {
-            Some(value) => value,
-            None => {
-                msg!("Overflow when adding to vault lamports");
-                return Err(RewardError::TransferFailed.into());
-            }
-        };
+        // ? - exit early from the function
+        let vault_balance = self
+            .reward_vault
+            .balance
+            .checked_add(amount)
+            .ok_or_else(|| {
+                msg!("Overflow when adding to reward vault balance");
+                RewardError::TransferFailed
+            })?;
 
-        // Apply transfers
-        **creator_lamports = new_creator_balance;
-        **vault_lamports = new_vault_balance;
-
-        // Update vault metadata
-        self.reward_vault.task_bump = self.task_account.bump;
-        self.reward_vault.bump = self.reward_vault.bump;
-
-        self.reward_vault.balance = match self.reward_vault.balance.checked_add(amount) {
-            Some(updated_balance) => updated_balance,
-            None => {
-                msg!("Overflow when updating reward vault balance");
-                return Err(RewardError::TransferFailed.into());
-            }
-        };
+        self.reward_vault.set_inner(RewardVaultAccount {
+            task_bump: bumps.task_account,
+            balance: vault_balance,
+            bump: bumps.reward_vault,
+        });
 
         Ok(())
     }
