@@ -36,12 +36,13 @@ pub enum TaskError {
 
 #[error_code]
 pub enum RewardError {
-    #[msg("Creator has insufficient funds to deposit.")]
-    InsufficientFunds,
-
-    #[msg("Failed to transfer lamports.")]
+    #[msg("Failed to transfer lamports")]
     TransferFailed,
+
+    #[msg("Invalid deposit amount")]
+    InvalidDepositAmount,
 }
+
 
 #[error_code]
 pub enum MagicblockError {

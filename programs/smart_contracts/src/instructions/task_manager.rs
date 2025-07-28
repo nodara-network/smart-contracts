@@ -68,6 +68,7 @@ impl<'info> CreateTask<'info> {
         max_responses: u16,
         deadline: i64,
         cid: String,
+        bumps: CreateTaskBumps
     ) -> Result<()> {
         // Ensure the task ID is non-zero
         if task_id == 0 {
@@ -104,7 +105,7 @@ impl<'info> CreateTask<'info> {
             deadline,
             responses_received: 0,
             is_complete: false,
-            bump: self.task_account.bump,
+            bump: bumps.task_account,
             cid,
         });
 

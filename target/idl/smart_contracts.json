@@ -573,33 +573,8 @@
   "errors": [
     {
       "code": 6000,
-      "name": "InputTooLarge",
-      "msg": "Input data too large."
-    },
-    {
-      "code": 6001,
-      "name": "TaskAlreadyComplete",
-      "msg": "Task already marked complete."
-    },
-    {
-      "code": 6002,
-      "name": "DeadlinePassed",
-      "msg": "Deadline has already passed."
-    },
-    {
-      "code": 6003,
-      "name": "NotEnoughResponses",
-      "msg": "Not enough valid responses yet."
-    },
-    {
-      "code": 6004,
-      "name": "ResponseAlreadyExists",
-      "msg": "Response already exists."
-    },
-    {
-      "code": 6005,
-      "name": "InsufficientVaultBalance",
-      "msg": "Vault does not have enough balance."
+      "name": "DelegateFailed",
+      "msg": "Failed to delegate task authority."
     }
   ],
   "types": [

@@ -579,33 +579,8 @@ export type SmartContracts = {
   "errors": [
     {
       "code": 6000,
-      "name": "inputTooLarge",
-      "msg": "Input data too large."
-    },
-    {
-      "code": 6001,
-      "name": "taskAlreadyComplete",
-      "msg": "Task already marked complete."
-    },
-    {
-      "code": 6002,
-      "name": "deadlinePassed",
-      "msg": "Deadline has already passed."
-    },
-    {
-      "code": 6003,
-      "name": "notEnoughResponses",
-      "msg": "Not enough valid responses yet."
-    },
-    {
-      "code": 6004,
-      "name": "responseAlreadyExists",
-      "msg": "Response already exists."
-    },
-    {
-      "code": 6005,
-      "name": "insufficientVaultBalance",
-      "msg": "Vault does not have enough balance."
+      "name": "delegateFailed",
+      "msg": "Failed to delegate task authority."
     }
   ],
   "types": [
