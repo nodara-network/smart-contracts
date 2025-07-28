@@ -72,6 +72,15 @@ pub mod smart_contracts {
     pub fn refund_remaining(ctx: Context<RefundRemaining>) -> Result<()> {
         ctx.accounts.refund_remaining()
     }
+
+    // magicblock
+    pub fn delegate_task_account(ctx: Context<DelegateTaskAccount>, task_id: u64) -> Result<()> {
+        ctx.accounts.delegate(task_id)        
+    }
+
+    pub fn undelegate_task_account(ctx: Context<UndelegateTaskAccount>) -> Result<()> {
+        ctx.accounts.undelegate()
+    }
 }
 
 /*
