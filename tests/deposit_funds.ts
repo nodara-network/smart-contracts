@@ -50,14 +50,18 @@ describe.only("nodara - deposit_funds (error and success cases)", () => {
     const { vaultPDA, taskPDA } = await createTask();
     const depositAmount = new anchor.BN(0.05 * LAMPORTS_PER_SOL);
 
-    await program.methods
-      .depositFunds(depositAmount)
-      .accountsPartial({
-        creator: wallet.publicKey,
-        taskAccount: taskPDA,
-        rewardVault: vaultPDA,
-      })
-      .rpc();
+    try {
+      await program.methods
+        .depositFunds(depositAmount)
+        .accountsPartial({
+          creator: wallet.publicKey,
+          taskAccount: taskPDA,
+          rewardVault: vaultPDA,
+        })
+        .rpc();
+    } catch (error) {
+      console.log(error);
+    }
 
     const vault = await provider.connection.getBalance(vaultPDA);
     const account = await program.account.rewardVaultAccount.fetch(vaultPDA);

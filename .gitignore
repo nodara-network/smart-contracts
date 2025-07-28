@@ -1,6 +1,12 @@
 .anchor
 .DS_Store
-target
+target/debug
+target/deploy
+target/release
+target/rust-analyzer
+target/sbf-solana-solana
+target/sbpf-solana-solana
+target/.rustc_info.json
 **/*.rs.bk
 node_modules
 test-ledger
