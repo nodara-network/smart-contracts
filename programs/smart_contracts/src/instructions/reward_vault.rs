@@ -1,5 +1,5 @@
 use crate::{
-    errors::{ErrorCode, RewardError},
+    errors::{RewardError, TaskError},
     states::{reward_accounts::*, task_accounts::*},
 };
 use anchor_lang::{
@@ -79,6 +79,51 @@ impl<'info> DepositFunds<'info> {
 }
 
 #[derive(Accounts)]
+pub struct RefundRemaining<'info> {
+    #[account(
+        mut,
+        has_one = creator,
+        seeds = [b"task", creator.key().as_ref(), task_account.task_id.to_le_bytes().as_ref()],
+        bump = task_account.bump,
+    )]
+    pub task_account: Account<'info, TaskAccount>,
+
+    #[account(
+        mut,
+        seeds = [b"vault", task_account.key().as_ref()],
+        bump = reward_vault.bump,
+        close = creator
+    )]
+    pub reward_vault: Account<'info, RewardVaultAccount>,
+
+    #[account(mut)]
+    pub creator: Signer<'info>,
+}
+
+impl<'info> RefundRemaining<'info> {
+    pub fn refund_remaining(&mut self) -> Result<()> {
+        require!(
+            !self.task_account.is_complete,
+            TaskError::TaskAlreadyComplete
+        );
+        require!(
+            Clock::get()?.unix_timestamp < self.task_account.deadline,
+            TaskError::DeadlinePassed
+        );
+        **self.creator.try_borrow_mut_lamports()? += self.reward_vault.balance;
+        **self
+            .reward_vault
+            .to_account_info()
+            .try_borrow_mut_lamports()? -= self.reward_vault.balance;
+
+        self.reward_vault.balance = 0;
+        self.task_account.is_complete = true;
+
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
 pub struct DisburseRewards<'info> {
     #[account(mut)]
     pub task_account: Account<'info, TaskAccount>,
@@ -98,7 +143,10 @@ impl<'info> DisburseRewards<'info> {
     pub fn disburse_rewards(&mut self, amount: u64) -> Result<()> {
         let vault = &mut self.reward_vault;
 
-        require!(vault.balance >= amount, ErrorCode::InsufficientVaultBalance);
+        require!(
+            vault.balance >= amount,
+            RewardError::InsufficientVaultBalance
+        );
 
         // TODO: Require signer to be MagicBlock delegate before disbursing
 
@@ -106,38 +154,6 @@ impl<'info> DisburseRewards<'info> {
         **vault.to_account_info().try_borrow_mut_lamports()? -= amount;
 
         vault.balance -= amount;
-
-        Ok(())
-    }
-}
-
-#[derive(Accounts)]
-pub struct RefundRemaining<'info> {
-    #[account(mut, has_one = creator)]
-    pub task_account: Account<'info, TaskAccount>,
-
-    #[account(
-        mut,
-        seeds = [b"vault", task_account.key().as_ref()],
-        bump = reward_vault.bump,
-        close = creator
-    )]
-    pub reward_vault: Account<'info, RewardVaultAccount>,
-
-    #[account(mut)]
-    pub creator: Signer<'info>,
-}
-
-impl<'info> RefundRemaining<'info> {
-    pub fn refund_remaining(&mut self) -> Result<()> {
-        let vault = &mut self.reward_vault;
-
-        // TODO: Optionally require MagicBlock (if delegate-based cancel happens)
-
-        **self.creator.try_borrow_mut_lamports()? += vault.balance;
-        **vault.to_account_info().try_borrow_mut_lamports()? -= vault.balance;
-
-        vault.balance = 0;
 
         Ok(())
     }

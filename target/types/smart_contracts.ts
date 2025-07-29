@@ -463,6 +463,49 @@ export type SmartContracts = {
       ]
     },
     {
+      "name": "initAdmin",
+      "discriminator": [
+        97,
+        65,
+        97,
+        27,
+        200,
+        206,
+        72,
+        219
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "adminAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "markTaskComplete",
       "discriminator": [
         129,
@@ -504,7 +547,10 @@ export type SmartContracts = {
         },
         {
           "name": "creator",
-          "signer": true
+          "signer": true,
+          "relations": [
+            "taskAccount"
+          ]
         }
       ],
       "args": []
@@ -561,7 +607,29 @@ export type SmartContracts = {
       "accounts": [
         {
           "name": "taskAccount",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  97,
+                  115,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "task_account.task_id",
+                "account": "taskAccount"
+              }
+            ]
+          }
         },
         {
           "name": "rewardVault",
@@ -765,6 +833,19 @@ export type SmartContracts = {
   ],
   "accounts": [
     {
+      "name": "adminAccount",
+      "discriminator": [
+        153,
+        119,
+        180,
+        178,
+        43,
+        66,
+        235,
+        148
+      ]
+    },
+    {
       "name": "responseAccount",
       "discriminator": [
         136,
@@ -807,31 +888,42 @@ export type SmartContracts = {
   "errors": [
     {
       "code": 6000,
-      "name": "invalidTaskId",
-      "msg": "Task ID must be non-zero."
+      "name": "inputTooLarge",
+      "msg": "Input data too large."
     },
     {
       "code": 6001,
-      "name": "invalidReward",
-      "msg": "Reward per response must be greater than zero."
+      "name": "taskAlreadyComplete",
+      "msg": "Task already marked complete."
     },
     {
       "code": 6002,
-      "name": "invalidMaxResponses",
-      "msg": "Max responses must be greater than zero."
+      "name": "notEnoughResponses",
+      "msg": "Not enough valid responses yet."
     },
     {
       "code": 6003,
-      "name": "invalidDeadline",
-      "msg": "Deadline must be in the future."
-    },
-    {
-      "code": 6004,
-      "name": "invalidCid",
-      "msg": "CID cannot be empty."
+      "name": "responseAlreadyExists",
+      "msg": "Response already exists."
     }
   ],
   "types": [
+    {
+      "name": "adminAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "responseAccount",
       "type": {

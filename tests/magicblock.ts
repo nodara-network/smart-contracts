@@ -1,11 +1,9 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { assert, expect } from "chai";
+import { PublicKey } from "@solana/web3.js";
 import { SmartContracts } from "../target/types/smart_contracts";
-import { GetCommitmentSignature } from "@magicblock-labs/ephemeral-rollups-sdk";
 
-describe.only("nodara - magicblock", () => {
+describe("nodara - magicblock", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
   const program = anchor.workspace.smartContracts as Program<SmartContracts>;
   const provider = anchor.getProvider();
@@ -34,7 +32,7 @@ describe.only("nodara - magicblock", () => {
     );
 
   const createTask = async () => {
-    const taskId = new anchor.BN(8);
+    const taskId = new anchor.BN(Math.floor(Math.random() * 1_000_000));
     const rewardPerResponse = new anchor.BN(100_000);
     const maxResponses = 10;
     const deadline = new anchor.BN(Math.floor(Date.now() / 1000) + 3600);

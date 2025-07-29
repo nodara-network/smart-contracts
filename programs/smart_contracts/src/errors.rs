@@ -6,14 +6,10 @@ pub enum ErrorCode {
     InputTooLarge,
     #[msg("Task already marked complete.")]
     TaskAlreadyComplete,
-    #[msg("Deadline has already passed.")]
-    DeadlinePassed,
     #[msg("Not enough valid responses yet.")]
     NotEnoughResponses,
     #[msg("Response already exists.")]
     ResponseAlreadyExists,
-    #[msg("Vault does not have enough balance.")]
-    InsufficientVaultBalance,
 }
 
 #[error_code]
@@ -35,6 +31,12 @@ pub enum TaskError {
 
     #[msg("Invalid creator.")]
     InvalidCreator,
+
+    #[msg("Task already marked complete.")]
+    TaskAlreadyComplete,
+
+    #[msg("Deadline has already passed.")]
+    DeadlinePassed,
 }
 
 #[error_code]
@@ -44,6 +46,9 @@ pub enum RewardError {
 
     #[msg("Invalid deposit amount")]
     InvalidDepositAmount,
+
+    #[msg("Vault does not have enough balance.")]
+    InsufficientVaultBalance,
 }
 
 #[error_code]

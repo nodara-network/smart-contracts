@@ -457,6 +457,49 @@
       ]
     },
     {
+      "name": "init_admin",
+      "discriminator": [
+        97,
+        65,
+        97,
+        27,
+        200,
+        206,
+        72,
+        219
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "admin_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "mark_task_complete",
       "discriminator": [
         129,
@@ -498,7 +541,10 @@
         },
         {
           "name": "creator",
-          "signer": true
+          "signer": true,
+          "relations": [
+            "task_account"
+          ]
         }
       ],
       "args": []
@@ -555,7 +601,29 @@
       "accounts": [
         {
           "name": "task_account",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  97,
+                  115,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "task_account.task_id",
+                "account": "TaskAccount"
+              }
+            ]
+          }
         },
         {
           "name": "reward_vault",
@@ -759,6 +827,19 @@
   ],
   "accounts": [
     {
+      "name": "AdminAccount",
+      "discriminator": [
+        153,
+        119,
+        180,
+        178,
+        43,
+        66,
+        235,
+        148
+      ]
+    },
+    {
       "name": "ResponseAccount",
       "discriminator": [
         136,
@@ -801,31 +882,42 @@
   "errors": [
     {
       "code": 6000,
-      "name": "InvalidTaskId",
-      "msg": "Task ID must be non-zero."
+      "name": "InputTooLarge",
+      "msg": "Input data too large."
     },
     {
       "code": 6001,
-      "name": "InvalidReward",
-      "msg": "Reward per response must be greater than zero."
+      "name": "TaskAlreadyComplete",
+      "msg": "Task already marked complete."
     },
     {
       "code": 6002,
-      "name": "InvalidMaxResponses",
-      "msg": "Max responses must be greater than zero."
+      "name": "NotEnoughResponses",
+      "msg": "Not enough valid responses yet."
     },
     {
       "code": 6003,
-      "name": "InvalidDeadline",
-      "msg": "Deadline must be in the future."
-    },
-    {
-      "code": 6004,
-      "name": "InvalidCID",
-      "msg": "CID cannot be empty."
+      "name": "ResponseAlreadyExists",
+      "msg": "Response already exists."
     }
   ],
   "types": [
+    {
+      "name": "AdminAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "ResponseAccount",
       "type": {

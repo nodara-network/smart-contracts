@@ -38,7 +38,7 @@ pub mod smart_contracts {
         )
     }
 
-    // creator calls this to cancel a task
+    // NOT INCLUDED IN V0
     pub fn cancel_task(ctx: Context<CancelTask>) -> Result<()> {
         ctx.accounts.cancel_task()
     }
@@ -80,6 +80,10 @@ pub mod smart_contracts {
 
     pub fn undelegate_task_account(ctx: Context<UndelegateTaskAccount>) -> Result<()> {
         ctx.accounts.undelegate()
+    }
+
+    pub fn init_admin(ctx: Context<InitAdmin>) -> Result<()> {
+        ctx.accounts.delegate(ctx.bumps)
     }
 }
 

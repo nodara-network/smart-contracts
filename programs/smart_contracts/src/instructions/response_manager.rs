@@ -1,11 +1,12 @@
 use crate::{
-    errors::ErrorCode,
+    errors::{TaskError},
     states::{response_accounts::*, task_accounts::*},
 };
 use anchor_lang::prelude::*;
+use ephemeral_rollups_sdk::anchor::commit;
 
+#[commit]
 #[derive(Accounts)]
-#[instruction()]
 pub struct SubmitResponse<'info> {
     #[account(
         mut,
@@ -42,7 +43,7 @@ impl<'info> SubmitResponse<'info> {
     pub fn submit_response(&mut self, cid: String) -> Result<()> {
         require!(
             Clock::get()?.unix_timestamp < self.task_account.deadline,
-            ErrorCode::DeadlinePassed
+            TaskError::DeadlinePassed
         );
 
         self.response_account.set_inner(ResponseAccount {
@@ -57,7 +58,7 @@ impl<'info> SubmitResponse<'info> {
         // update task response count
         self.task_account.responses_received =
             self.task_account.responses_received.saturating_add(1);
-
+            
         Ok(())
     }
 }

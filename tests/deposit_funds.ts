@@ -4,7 +4,7 @@ import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { assert, expect } from "chai";
 import { SmartContracts } from "../target/types/smart_contracts";
 
-describe.skip("nodara - deposit_funds", () => {
+describe("nodara - deposit_funds", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
   const program = anchor.workspace.smartContracts as Program<SmartContracts>;
   const provider = anchor.getProvider();

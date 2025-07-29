@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::{
     errors::{ErrorCode, TaskError},
-    RewardVaultAccount, TaskAccount,
+    RewardVaultAccount, TaskAccount
 };
 
 /// Creates a new task and stores it in a PDA.
@@ -55,7 +55,8 @@ pub struct MarkTaskComplete<'info> {
     #[account(
         mut,
         seeds = [b"task", task_account.creator.as_ref(), &task_account.task_id.to_le_bytes()],
-        bump = task_account.bump
+        bump = task_account.bump,
+        has_one = creator
     )]
     pub task_account: Account<'info, TaskAccount>, // Task to complete
 
@@ -121,27 +122,17 @@ impl<'info> CreateTask<'info> {
     }
 }
 
+// NOT INCLUDED IN V0
 impl<'info> CancelTask<'info> {
     pub fn cancel_task(&mut self) -> Result<()> {
         let task = &mut self.task_account;
 
-        if task.creator != self.creator.key() {
-            return Err(TaskError::InvalidCreator.into());
-        }
-
-        require!(!task.is_complete, ErrorCode::TaskAlreadyComplete); // Must not be complete
+        require!(!task.is_complete, ErrorCode::TaskAlreadyComplete); 
         require!(
             Clock::get()?.unix_timestamp < task.deadline,
-            ErrorCode::DeadlinePassed
-        ); // Must be before deadline
-
-        let vault = &mut self.reward_vault;
-
-        **self.creator.try_borrow_mut_lamports()? += vault.balance; // Refund to creator
-        **vault.to_account_info().try_borrow_mut_lamports()? -= vault.balance; // Deduct from vault
-
-        vault.balance = 0; // Clear vault
-
+            TaskError::DeadlinePassed
+        );
+        
         Ok(())
     }
 }
@@ -150,11 +141,11 @@ impl<'info> MarkTaskComplete<'info> {
     pub fn mark_task_complete(&mut self) -> Result<()> {
         let task = &mut self.task_account;
 
-        require!(!task.is_complete, ErrorCode::TaskAlreadyComplete); // Must not be complete
-        require!(
-            task.responses_received >= task.max_responses,
-            ErrorCode::NotEnoughResponses
-        ); // Require enough responses
+        require!(!task.is_complete, ErrorCode::TaskAlreadyComplete);
+        // require!(
+        //     task.responses_received >= task.max_responses,
+        //     ErrorCode::NotEnoughResponses
+        // ); // Require enough responses
 
         task.is_complete = true; // Mark complete
 
