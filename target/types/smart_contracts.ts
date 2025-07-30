@@ -14,80 +14,6 @@ export type SmartContracts = {
   },
   "instructions": [
     {
-      "name": "cancelTask",
-      "discriminator": [
-        69,
-        228,
-        134,
-        187,
-        134,
-        105,
-        238,
-        48
-      ],
-      "accounts": [
-        {
-          "name": "taskAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  116,
-                  97,
-                  115,
-                  107
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "task_account.creator",
-                "account": "taskAccount"
-              },
-              {
-                "kind": "account",
-                "path": "task_account.task_id",
-                "account": "taskAccount"
-              }
-            ]
-          }
-        },
-        {
-          "name": "creator",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "rewardVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "taskAccount"
-              }
-            ]
-          }
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "createTask",
       "discriminator": [
         194,
@@ -159,178 +85,6 @@ export type SmartContracts = {
       ]
     },
     {
-      "name": "delegateTaskAccount",
-      "discriminator": [
-        71,
-        106,
-        16,
-        90,
-        137,
-        161,
-        102,
-        241
-      ],
-      "accounts": [
-        {
-          "name": "creator",
-          "signer": true
-        },
-        {
-          "name": "bufferTaskAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  98,
-                  117,
-                  102,
-                  102,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "taskAccount"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                143,
-                165,
-                99,
-                25,
-                117,
-                108,
-                133,
-                228,
-                182,
-                107,
-                2,
-                86,
-                120,
-                97,
-                20,
-                28,
-                179,
-                102,
-                90,
-                245,
-                48,
-                126,
-                88,
-                177,
-                80,
-                99,
-                207,
-                145,
-                11,
-                27,
-                185,
-                3
-              ]
-            }
-          }
-        },
-        {
-          "name": "delegationRecordTaskAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  100,
-                  101,
-                  108,
-                  101,
-                  103,
-                  97,
-                  116,
-                  105,
-                  111,
-                  110
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "taskAccount"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "delegationProgram"
-            }
-          }
-        },
-        {
-          "name": "delegationMetadataTaskAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  100,
-                  101,
-                  108,
-                  101,
-                  103,
-                  97,
-                  116,
-                  105,
-                  111,
-                  110,
-                  45,
-                  109,
-                  101,
-                  116,
-                  97,
-                  100,
-                  97,
-                  116,
-                  97
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "taskAccount"
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "delegationProgram"
-            }
-          }
-        },
-        {
-          "name": "taskAccount",
-          "writable": true
-        },
-        {
-          "name": "ownerProgram",
-          "address": "Afja4Q8urL5j8Hn3PpCkgP2Tgpe8xtp98khPmAVZF5Vk"
-        },
-        {
-          "name": "delegationProgram",
-          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "taskId",
-          "type": "u64"
-        }
-      ]
-    },
-    {
       "name": "depositFunds",
       "discriminator": [
         202,
@@ -389,6 +143,28 @@ export type SmartContracts = {
               }
             ]
           }
+        },
+        {
+          "name": "adminAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "adminAuthority",
+          "writable": true
         },
         {
           "name": "creator",
@@ -546,51 +322,30 @@ export type SmartContracts = {
           }
         },
         {
-          "name": "creator",
-          "signer": true,
-          "relations": [
-            "taskAccount"
-          ]
+          "name": "adminAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
         }
       ],
       "args": []
-    },
-    {
-      "name": "processUndelegation",
-      "discriminator": [
-        196,
-        28,
-        41,
-        206,
-        48,
-        37,
-        51,
-        167
-      ],
-      "accounts": [
-        {
-          "name": "baseAccount",
-          "writable": true
-        },
-        {
-          "name": "buffer"
-        },
-        {
-          "name": "payer",
-          "writable": true
-        },
-        {
-          "name": "systemProgram"
-        }
-      ],
-      "args": [
-        {
-          "name": "accountSeeds",
-          "type": {
-            "vec": "bytes"
-          }
-        }
-      ]
     },
     {
       "name": "refundRemaining",
@@ -735,8 +490,30 @@ export type SmartContracts = {
         },
         {
           "name": "responder",
+          "writable": true
+        },
+        {
+          "name": "admin",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "adminAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
         },
         {
           "name": "systemProgram",
@@ -749,62 +526,6 @@ export type SmartContracts = {
           "type": "string"
         }
       ]
-    },
-    {
-      "name": "undelegateTaskAccount",
-      "discriminator": [
-        201,
-        104,
-        83,
-        58,
-        81,
-        253,
-        21,
-        82
-      ],
-      "accounts": [
-        {
-          "name": "creator",
-          "signer": true
-        },
-        {
-          "name": "taskAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  116,
-                  97,
-                  115,
-                  107
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "task_account.creator",
-                "account": "taskAccount"
-              },
-              {
-                "kind": "account",
-                "path": "task_account.task_id",
-                "account": "taskAccount"
-              }
-            ]
-          }
-        },
-        {
-          "name": "magicProgram",
-          "address": "Magic11111111111111111111111111111111111111"
-        },
-        {
-          "name": "magicContext",
-          "writable": true,
-          "address": "MagicContext1111111111111111111111111111111"
-        }
-      ],
-      "args": []
     },
     {
       "name": "verifyResponse",
@@ -822,6 +543,24 @@ export type SmartContracts = {
         {
           "name": "responseAccount",
           "writable": true
+        },
+        {
+          "name": "adminAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
         },
         {
           "name": "signer",

@@ -1,11 +1,7 @@
 use anchor_lang::prelude::*;
 
-use crate::{
-    errors::{ErrorCode, TaskError},
-    RewardVaultAccount, TaskAccount
-};
+use crate::{errors::TaskError, AdminAccount, TaskAccount};
 
-/// Creates a new task and stores it in a PDA.
 #[derive(Accounts)]
 #[instruction(task_id: u64)]
 pub struct CreateTask<'info> {
@@ -16,52 +12,12 @@ pub struct CreateTask<'info> {
         payer = creator,
         space = 8 + TaskAccount::INIT_SPACE
     )]
-    pub task_account: Account<'info, TaskAccount>, // Task PDA
+    pub task_account: Account<'info, TaskAccount>,
 
     #[account(mut)]
-    pub creator: Signer<'info>, // Task creator
+    pub creator: Signer<'info>,
 
-    pub system_program: Program<'info, System>, // System program
-}
-
-/// Closes a task and refunds remaining balance.
-#[derive(Accounts)]
-pub struct CancelTask<'info> {
-    #[account(
-        mut,
-        seeds = [b"task", task_account.creator.as_ref(), &task_account.task_id.to_le_bytes()],
-        bump = task_account.bump,
-        close = creator
-    )]
-    pub task_account: Account<'info, TaskAccount>, // Task to cancel
-
-    #[account(mut, address = task_account.creator)]
-    pub creator: Signer<'info>, // Must match creator
-
-    #[account(
-        mut,
-        seeds = [b"vault", task_account.key().as_ref()],
-        bump = reward_vault.bump,
-        close = creator
-    )]
-    pub reward_vault: Account<'info, RewardVaultAccount>, // Task vault
-
-    pub system_program: Program<'info, System>, // System program
-}
-
-/// Marks a task as complete.
-#[derive(Accounts)]
-pub struct MarkTaskComplete<'info> {
-    #[account(
-        mut,
-        seeds = [b"task", task_account.creator.as_ref(), &task_account.task_id.to_le_bytes()],
-        bump = task_account.bump,
-        has_one = creator
-    )]
-    pub task_account: Account<'info, TaskAccount>, // Task to complete
-
-    #[account(address = task_account.creator)]
-    pub creator: Signer<'info>, // Must match creator
+    pub system_program: Program<'info, System>,
 }
 
 impl<'info> CreateTask<'info> {
@@ -122,34 +78,39 @@ impl<'info> CreateTask<'info> {
     }
 }
 
-// NOT INCLUDED IN V0
-impl<'info> CancelTask<'info> {
-    pub fn cancel_task(&mut self) -> Result<()> {
-        let task = &mut self.task_account;
+#[derive(Accounts)]
+pub struct MarkTaskComplete<'info> {
+    #[account(
+        mut,
+        seeds = [b"task", task_account.creator.as_ref(), &task_account.task_id.to_le_bytes()],
+        bump = task_account.bump,
+    )]
+    pub task_account: Account<'info, TaskAccount>,
 
-        require!(!task.is_complete, ErrorCode::TaskAlreadyComplete); 
-        require!(
-            Clock::get()?.unix_timestamp < task.deadline,
-            TaskError::DeadlinePassed
-        );
-        
-        Ok(())
-    }
+    #[account(
+        mut,
+        seeds = [b"admin"],
+        bump = admin_account.bump,
+    )]
+    pub admin_account: Account<'info, AdminAccount>,
+
+    #[account(mut)]
+    pub signer: Signer<'info>,
 }
 
 impl<'info> MarkTaskComplete<'info> {
     pub fn mark_task_complete(&mut self) -> Result<()> {
-        let task = &mut self.task_account;
+        let task = &self.task_account;
 
-        require!(!task.is_complete, ErrorCode::TaskAlreadyComplete);
-        // require!(
-        //     task.responses_received >= task.max_responses,
-        //     ErrorCode::NotEnoughResponses
-        // ); // Require enough responses
+        require!(
+            self.admin_account.authority == self.signer.key()
+                || self.signer.key() == self.task_account.creator.key(),
+            TaskError::Unauthorized
+        );
 
-        task.is_complete = true; // Mark complete
+        require!(!task.is_complete, TaskError::TaskAlreadyComplete);
 
-        // TODO: May be bypassed if completion happens via MagicBlock
+        self.task_account.is_complete = true;
 
         Ok(())
     }

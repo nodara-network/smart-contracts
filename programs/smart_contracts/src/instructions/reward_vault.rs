@@ -1,6 +1,7 @@
 use crate::{
     errors::{RewardError, TaskError},
     states::{reward_accounts::*, task_accounts::*},
+    AdminAccount,
 };
 use anchor_lang::{
     prelude::*,
@@ -26,6 +27,20 @@ pub struct DepositFunds<'info> {
     )]
     pub reward_vault: Account<'info, RewardVaultAccount>,
 
+    #[account(
+        mut,
+        seeds = [b"admin"],
+        bump = admin_account.bump
+    )]
+    pub admin_account: Account<'info, AdminAccount>,
+
+    #[account(
+        mut,
+        constraint = admin_authority.key() == admin_account.authority
+    )]
+    /// CHECK: This is safe because we check it matches admin_account.authority
+    pub admin_authority: UncheckedAccount<'info>,
+
     #[account(mut)]
     pub creator: Signer<'info>,
 
@@ -44,9 +59,43 @@ impl<'info> DepositFunds<'info> {
             return Err(RewardError::InvalidDepositAmount.into());
         }
 
-        // ? - exit early from the function
+        let platform_fee = amount
+            .checked_mul(69)
+            .and_then(|v| v.checked_div(1000))
+            .ok_or_else(|| {
+                msg!("Overflow while calculating platform fee");
+                RewardError::TransferFailed
+            })?;
+
+        let net_deposit = amount.checked_sub(platform_fee).ok_or_else(|| {
+            msg!("Underflow when subtracting platform fee");
+            RewardError::TransferFailed
+        })?;
+
         invoke(
-            &transfer(&self.creator.key(), &self.reward_vault.key(), amount),
+            &transfer(
+                &self.creator.key(),
+                &self.admin_authority.key(),
+                platform_fee,
+            ),
+            &[
+                self.creator.to_account_info(),
+                self.admin_authority.to_account_info(),
+                self.system_program.to_account_info(),
+            ],
+        )
+        .map_err(|e| {
+            msg!(
+                "Failed to transfer platform fee ({} lamports) to admin: {}",
+                platform_fee,
+                e
+            );
+            RewardError::TransferFailed
+        })?;
+
+        // Transfer net deposit to reward vault
+        invoke(
+            &transfer(&self.creator.key(), &self.reward_vault.key(), net_deposit),
             &[
                 self.creator.to_account_info(),
                 self.reward_vault.to_account_info(),
@@ -54,15 +103,18 @@ impl<'info> DepositFunds<'info> {
             ],
         )
         .map_err(|e| {
-            msg!("Failed to transfer lamports via CPI: {}", e);
+            msg!(
+                "Failed to transfer net deposit ({} lamports) to reward vault: {}",
+                net_deposit,
+                e
+            );
             RewardError::TransferFailed
         })?;
 
-        // ? - exit early from the function
         let vault_balance = self
             .reward_vault
             .balance
-            .checked_add(amount)
+            .checked_add(net_deposit)
             .ok_or_else(|| {
                 msg!("Overflow when adding to reward vault balance");
                 RewardError::TransferFailed
@@ -117,7 +169,6 @@ impl<'info> RefundRemaining<'info> {
             .try_borrow_mut_lamports()? -= self.reward_vault.balance;
 
         self.reward_vault.balance = 0;
-        self.task_account.is_complete = true;
 
         Ok(())
     }

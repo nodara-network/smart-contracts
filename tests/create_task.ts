@@ -1,8 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { SmartContracts } from "../target/types/smart_contracts";
-import { PublicKey } from "@solana/web3.js";
 import { assert, expect } from "chai";
+import { SmartContracts } from "../target/types/smart_contracts";
+import { validTaskInput } from "./test-utils";
 
 describe("nodara - create_task", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
@@ -10,40 +10,9 @@ describe("nodara - create_task", () => {
   const provider = anchor.getProvider();
   const wallet = provider.wallet;
 
-  const generateTaskPDA = async (taskId: anchor.BN) => {
-    const [taskPDA, bump] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("task"),
-        wallet.publicKey.toBuffer(),
-        Buffer.from(taskId.toArray("le", 8)),
-      ],
-      program.programId
-    );
-    return { taskPDA, bump };
-  };
-
-  const validTaskInput = async () => {
-    const taskId = new anchor.BN(Math.floor(Math.random() * 1_000_000));
-    const rewardPerResponse = new anchor.BN(100_000); // 0.1 SOL
-    const maxResponses = 5;
-    const deadline = new anchor.BN(Math.floor(Date.now() / 1000 + 3600)); // 1 hour later
-    const cid = "QmValidCIDHash";
-    const { taskPDA, bump } = await generateTaskPDA(taskId);
-
-    return {
-      taskId,
-      rewardPerResponse,
-      maxResponses,
-      deadline,
-      cid,
-      taskPDA,
-      bump,
-    };
-  };
-
   it("Creates a task successfully", async () => {
     const { taskId, rewardPerResponse, maxResponses, deadline, cid, taskPDA } =
-      await validTaskInput();
+      await validTaskInput(wallet.publicKey, program);
 
     await program.methods
       .createTask(taskId, rewardPerResponse, maxResponses, deadline, cid)
@@ -69,7 +38,7 @@ describe("nodara - create_task", () => {
 
   it("Fails with task_id = 0", async () => {
     const { rewardPerResponse, maxResponses, deadline, cid } =
-      await validTaskInput();
+      await validTaskInput(wallet.publicKey, program);
 
     const taskId = new anchor.BN(0);
 
@@ -88,7 +57,8 @@ describe("nodara - create_task", () => {
   });
 
   it("Fails with reward_per_response = 0", async () => {
-    const { taskId, maxResponses, deadline, cid } = await validTaskInput();
+    const { taskId, maxResponses, deadline, cid } = await validTaskInput(wallet.publicKey, program);
+
 
     try {
       await program.methods
@@ -104,7 +74,8 @@ describe("nodara - create_task", () => {
   });
 
   it("Fails with max_responses = 0", async () => {
-    const { taskId, rewardPerResponse, deadline, cid } = await validTaskInput();
+    const { taskId, rewardPerResponse, deadline, cid } = await validTaskInput(wallet.publicKey, program);
+
 
     try {
       await program.methods
@@ -121,7 +92,7 @@ describe("nodara - create_task", () => {
 
   it("Fails with deadline in the past", async () => {
     const { taskId, rewardPerResponse, maxResponses, cid } =
-      await validTaskInput();
+      await validTaskInput(wallet.publicKey, program);
 
     const pastDeadline = new anchor.BN(Math.floor(Date.now() / 1000 - 60));
 
@@ -140,7 +111,7 @@ describe("nodara - create_task", () => {
 
   it("Fails with empty CID", async () => {
     const { taskId, rewardPerResponse, maxResponses, deadline } =
-      await validTaskInput();
+      await validTaskInput(wallet.publicKey, program);
 
     try {
       await program.methods
@@ -156,7 +127,7 @@ describe("nodara - create_task", () => {
   });
 
   it("Fails when task account already exists", async () => {
-    const input = await validTaskInput();
+    const input = await validTaskInput(wallet.publicKey, program);
 
     // First creation should succeed
     await program.methods

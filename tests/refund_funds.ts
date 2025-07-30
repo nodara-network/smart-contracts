@@ -3,6 +3,7 @@ import { Program } from "@coral-xyz/anchor";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { assert, expect } from "chai";
 import { SmartContracts } from "../target/types/smart_contracts";
+import { createTask, generateAdminPDA } from "./test-utils";
 
 describe("nodara - refund_funds", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
@@ -10,38 +11,11 @@ describe("nodara - refund_funds", () => {
   const provider = anchor.getProvider();
   const wallet = provider.wallet;
 
-  const generateTaskPDA = (creator: PublicKey, taskId: anchor.BN) =>
-    PublicKey.findProgramAddressSync(
-      [Buffer.from("task"), creator.toBuffer(), Buffer.from(taskId.toArray("le", 8))],
-      program.programId
-    );
-
-  const generateVaultPDA = (taskPDA: PublicKey) =>
-    PublicKey.findProgramAddressSync(
-      [Buffer.from("vault"), taskPDA.toBuffer()],
-      program.programId
-    );
-
-  const createTask = async () => {
-    const taskId = new anchor.BN(Math.floor(Math.random() * 1_000_000));
-    const rewardPerResponse = new anchor.BN(100_000);
-    const maxResponses = 10;
-    const deadline = new anchor.BN(Math.floor(Date.now() / 1000) + 3600);
-    const cid = "QmCID" + taskId.toString();
-
-    const [taskPDA] = generateTaskPDA(wallet.publicKey, taskId);
-    const [vaultPDA] = generateVaultPDA(taskPDA);
-
-    await program.methods
-      .createTask(taskId, rewardPerResponse, maxResponses, deadline, cid)
-      .accounts({ creator: wallet.publicKey })
-      .rpc();
-
-    return { taskId, taskPDA, vaultPDA };
-  };
+  const [adminAccountPDA] = generateAdminPDA(program);
+  const adminAuthority = wallet.publicKey;
 
   it("Succeeds refund", async () => {
-    const { vaultPDA, taskPDA, taskId } = await createTask();
+    const { vaultPDA, taskPDA, taskId } = await createTask(wallet.publicKey, program);
     const depositAmount = new anchor.BN(0.05 * LAMPORTS_PER_SOL);
 
     await program.methods
@@ -50,6 +24,8 @@ describe("nodara - refund_funds", () => {
         creator: wallet.publicKey,
         taskAccount: taskPDA,
         rewardVault: vaultPDA,
+        adminAccount: adminAccountPDA,
+        adminAuthority,
       })
       .rpc();
 
@@ -67,7 +43,7 @@ describe("nodara - refund_funds", () => {
   });
 
   it("Fails if caller is not the task creator", async () => {
-    const { taskId, taskPDA, vaultPDA } = await createTask();
+    const { taskId, taskPDA, vaultPDA } = await createTask(wallet.publicKey, program);
 
     // Fund and deposit from real creator
     const depositAmount = new anchor.BN(0.05 * LAMPORTS_PER_SOL);
@@ -77,6 +53,8 @@ describe("nodara - refund_funds", () => {
         creator: wallet.publicKey,
         taskAccount: taskPDA,
         rewardVault: vaultPDA,
+        adminAccount: adminAccountPDA,
+        adminAuthority,
       })
       .rpc();
 
@@ -98,12 +76,12 @@ describe("nodara - refund_funds", () => {
 
       assert.fail("Expected refund to fail for non-creator");
     } catch (err: any) {
-      expect(err.message).to.include("has one constraint was violated.");
+      expect(err.message).to.include("AnchorError caused by account: task_account.");
     }
   });
 
   it("Fails if task is already complete", async () => {
-    const { taskId, taskPDA, vaultPDA } = await createTask();
+    const { taskId, taskPDA, vaultPDA } = await createTask(wallet.publicKey, program, 1);
 
     const depositAmount = new anchor.BN(0.05 * LAMPORTS_PER_SOL);
     await program.methods
@@ -112,20 +90,29 @@ describe("nodara - refund_funds", () => {
         creator: wallet.publicKey,
         taskAccount: taskPDA,
         rewardVault: vaultPDA,
+        adminAccount: adminAccountPDA,
+        adminAuthority,
       })
       .rpc();
 
-    // Mark task complete
+    // Submit Response
+    const responder = Keypair.generate();
+    const [responsePDA] = PublicKey.findProgramAddressSync(
+      [Buffer.from("response"), taskPDA.toBuffer(), responder.publicKey.toBuffer()],
+      program.programId
+    );
     await program.methods
-      .markTaskComplete()
+      .submitResponse("QmTestCID")
       .accountsPartial({
-        creator: wallet.publicKey,
-        taskAccount: taskPDA
+        taskAccount: taskPDA,
+        responseAccount: responsePDA,
+        responder: responder.publicKey,
+        admin: wallet.publicKey,
+        adminAccount: adminAccountPDA,
       })
       .rpc();
 
     // Attempt refund
-    // Remove the Require enough responses check to pass this error
     try {
       await program.methods
         .refundRemaining()

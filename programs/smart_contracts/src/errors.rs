@@ -37,6 +37,18 @@ pub enum TaskError {
 
     #[msg("Deadline has already passed.")]
     DeadlinePassed,
+
+    #[msg("Max responses reached.")]
+    MaxResponsesReached,
+
+    #[msg("Response already exists.")]
+    ResponseAlreadyExists,
+
+    #[msg("Unauthorized")]
+    Unauthorized,
+
+    #[msg("Not enough responses yet")]
+    NotEnoughResponses,
 }
 
 #[error_code]

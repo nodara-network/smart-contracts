@@ -532,52 +532,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ephemeral-rollups-sdk"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "457c3014687a59af27e1ccb46e20e6c16dc53cae5221c871a6daa64d6bfad95b"
-dependencies = [
- "anchor-lang",
- "borsh 1.5.7",
- "ephemeral-rollups-sdk-attribute-commit",
- "ephemeral-rollups-sdk-attribute-delegate",
- "ephemeral-rollups-sdk-attribute-ephemeral",
- "solana-program",
-]
-
-[[package]]
-name = "ephemeral-rollups-sdk-attribute-commit"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80fb73771b65248443528a0fd909729997a61e376b7be0104af71d8ca4fd6ba7"
-dependencies = [
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "ephemeral-rollups-sdk-attribute-delegate"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "503219d396b9a9e8345ee48f00cfaffa08d216ed7be6e9f754918d056a043b4e"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "ephemeral-rollups-sdk-attribute-ephemeral"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1e81a3c602c3b70605e4bd482b85f41009d467e2e4708d3293830bf03a013cd"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1154,7 +1108,6 @@ name = "smart_contracts"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
- "ephemeral-rollups-sdk",
 ]
 
 [[package]]

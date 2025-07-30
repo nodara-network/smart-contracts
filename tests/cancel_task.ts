@@ -1,51 +1,26 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { assert, expect } from "chai";
 import { SmartContracts } from "../target/types/smart_contracts";
+import { createTask, generateAdminPDA } from "./test-utils";
 
-describe.skip("nodara - cancel_task", () => {
+describe("nodara - cancel_task", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
   const program = anchor.workspace.smartContracts as Program<SmartContracts>;
   const provider = anchor.getProvider();
   const wallet = provider.wallet;
 
-  const generateTaskPDA = (creator: PublicKey, taskId: anchor.BN) =>
-    PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("task"),
-        creator.toBuffer(),
-        Buffer.from(taskId.toArray("le", 8)),
-      ],
-      program.programId
-    );
+  const [adminAccountPDA] = generateAdminPDA(program);
+  const adminAuthority = wallet.publicKey;
 
-  const generateVaultPDA = (taskPDA: PublicKey) =>
-    PublicKey.findProgramAddressSync(
-      [Buffer.from("vault"), taskPDA.toBuffer()],
-      program.programId
-    );
-
-  const createTask = async () => {
-    const taskId = new anchor.BN(Math.floor(Math.random() * 1_000_000));
-    const rewardPerResponse = new anchor.BN(100_000);
-    const maxResponses = 10;
-    const deadline = new anchor.BN(Math.floor(Date.now() / 1000) + 3600);
-    const cid = "QmCID" + taskId.toString();
-
-    const [taskPDA] = generateTaskPDA(wallet.publicKey, taskId);
-    const [vaultPDA] = generateVaultPDA(taskPDA);
-
-    await program.methods
-      .createTask(taskId, rewardPerResponse, maxResponses, deadline, cid)
-      .accounts({ creator: wallet.publicKey })
-      .rpc();
-
-    return { taskId, taskPDA, vaultPDA };
+  // Helper function to calculate fees
+  const calculateFees = (amount: anchor.BN): number => {
+    return Math.floor(amount.mul(new anchor.BN(69)).div(new anchor.BN(1000)).toNumber()); // Corrected denominator to 1000 for 6.9%
   };
 
   it("Succeeds on first deposit", async () => {
-    const { vaultPDA, taskPDA, taskId } = await createTask();
+    const { vaultPDA, taskPDA, taskId } = await createTask(wallet.publicKey, program);
     const depositAmount = new anchor.BN(0.05 * LAMPORTS_PER_SOL);
 
     await program.methods
@@ -54,6 +29,8 @@ describe.skip("nodara - cancel_task", () => {
         creator: wallet.publicKey,
         taskAccount: taskPDA,
         rewardVault: vaultPDA,
+        adminAccount: adminAccountPDA,
+        adminAuthority,
       })
       .rpc();
 
@@ -64,14 +41,19 @@ describe.skip("nodara - cancel_task", () => {
     const vaultBalance = await provider.connection.getBalance(vaultPDA);
     const account = await program.account.rewardVaultAccount.fetch(vaultPDA);
 
-    assert.equal(vaultBalance, depositAmount.toNumber() + rent);
-    assert.equal(account.balance.toNumber(), depositAmount.toNumber());
+    const fees = calculateFees(depositAmount);
+    assert.equal(vaultBalance, depositAmount.toNumber() - fees + rent);
+    assert.equal(account.balance.toNumber(), depositAmount.toNumber() - fees);
   });
 
   it("Allows multiple deposits (adds up)", async () => {
-    const { vaultPDA, taskPDA, taskId } = await createTask();
+    const { vaultPDA, taskPDA, taskId } = await createTask(wallet.publicKey, program);
     const firstAmount = new anchor.BN(0.01 * LAMPORTS_PER_SOL);
     const secondAmount = new anchor.BN(0.03 * LAMPORTS_PER_SOL);
+
+    // Calculate fees for the first deposit
+    const firstFees = calculateFees(firstAmount);
+    const firstNetDeposit = firstAmount.toNumber() - firstFees;
 
     await program.methods
       .depositFunds(taskId, firstAmount)
@@ -79,8 +61,14 @@ describe.skip("nodara - cancel_task", () => {
         creator: wallet.publicKey,
         taskAccount: taskPDA,
         rewardVault: vaultPDA,
+        adminAccount: adminAccountPDA,
+        adminAuthority,
       })
       .rpc();
+
+    // Calculate fees for the second deposit
+    const secondFees = calculateFees(secondAmount);
+    const secondNetDeposit = secondAmount.toNumber() - secondFees;
 
     await program.methods
       .depositFunds(taskId, secondAmount)
@@ -88,17 +76,19 @@ describe.skip("nodara - cancel_task", () => {
         creator: wallet.publicKey,
         taskAccount: taskPDA,
         rewardVault: vaultPDA,
+        adminAccount: adminAccountPDA,
+        adminAuthority,
       })
       .rpc();
 
     const account = await program.account.rewardVaultAccount.fetch(vaultPDA);
-    const total = firstAmount.add(secondAmount).toNumber();
+    const totalExpectedBalance = firstNetDeposit + secondNetDeposit;
 
-    assert.equal(account.balance.toNumber(), total);
+    assert.equal(account.balance.toNumber(), totalExpectedBalance);
   });
 
   it("Fails on zero lamport deposit", async () => {
-    const { vaultPDA, taskPDA, taskId } = await createTask();
+    const { vaultPDA, taskPDA, taskId } = await createTask(wallet.publicKey, program);
     const zeroAmount = new anchor.BN(0);
 
     try {
@@ -108,6 +98,8 @@ describe.skip("nodara - cancel_task", () => {
           creator: wallet.publicKey,
           taskAccount: taskPDA,
           rewardVault: vaultPDA,
+          adminAccount: adminAccountPDA,
+          adminAuthority,
         })
         .rpc();
       assert.fail("Should have thrown");
@@ -117,7 +109,7 @@ describe.skip("nodara - cancel_task", () => {
   });
 
   it("Fails when vault PDA is wrong", async () => {
-    const { taskId, taskPDA } = await createTask();
+    const { taskId, taskPDA } = await createTask(wallet.publicKey, program);
     const wrongVault = Keypair.generate().publicKey;
     const amount = new anchor.BN(0.01 * LAMPORTS_PER_SOL);
 
@@ -128,6 +120,8 @@ describe.skip("nodara - cancel_task", () => {
           creator: wallet.publicKey,
           taskAccount: taskPDA,
           rewardVault: wrongVault,
+          adminAccount: adminAccountPDA,
+          adminAuthority,
         })
         .rpc();
       assert.fail("Should have failed due to PDA mismatch");
@@ -137,7 +131,7 @@ describe.skip("nodara - cancel_task", () => {
   });
 
   it("Fails if not the task creator", async () => {
-    const { vaultPDA, taskPDA, taskId } = await createTask();
+    const { vaultPDA, taskPDA, taskId } = await createTask(wallet.publicKey, program);
 
     const fakeUser = Keypair.generate();
     const amount = new anchor.BN(0.01 * LAMPORTS_PER_SOL);
@@ -156,6 +150,8 @@ describe.skip("nodara - cancel_task", () => {
           creator: fakeUser.publicKey,
           taskAccount: taskPDA,
           rewardVault: vaultPDA,
+          adminAccount: adminAccountPDA,
+          adminAuthority,
         })
         .signers([fakeUser])
         .rpc();
