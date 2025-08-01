@@ -621,23 +621,63 @@
   "errors": [
     {
       "code": 6000,
-      "name": "InputTooLarge",
-      "msg": "Input data too large."
+      "name": "InvalidTaskId",
+      "msg": "Task ID must be non-zero."
     },
     {
       "code": 6001,
+      "name": "InvalidReward",
+      "msg": "Reward per response must be greater than zero."
+    },
+    {
+      "code": 6002,
+      "name": "InvalidMaxResponses",
+      "msg": "Max responses must be greater than zero."
+    },
+    {
+      "code": 6003,
+      "name": "InvalidDeadline",
+      "msg": "Deadline must be in the future."
+    },
+    {
+      "code": 6004,
+      "name": "InvalidCID",
+      "msg": "CID cannot be empty."
+    },
+    {
+      "code": 6005,
+      "name": "InvalidCreator",
+      "msg": "Invalid creator."
+    },
+    {
+      "code": 6006,
       "name": "TaskAlreadyComplete",
       "msg": "Task already marked complete."
     },
     {
-      "code": 6002,
-      "name": "NotEnoughResponses",
-      "msg": "Not enough valid responses yet."
+      "code": 6007,
+      "name": "DeadlinePassed",
+      "msg": "Deadline has already passed."
     },
     {
-      "code": 6003,
+      "code": 6008,
+      "name": "MaxResponsesReached",
+      "msg": "Max responses reached."
+    },
+    {
+      "code": 6009,
       "name": "ResponseAlreadyExists",
       "msg": "Response already exists."
+    },
+    {
+      "code": 6010,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6011,
+      "name": "NotEnoughResponses",
+      "msg": "Not enough responses yet"
     }
   ],
   "types": [
