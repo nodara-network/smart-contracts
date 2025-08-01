@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/smart_contracts.json`.
  */
 export type SmartContracts = {
-  "address": "Afja4Q8urL5j8Hn3PpCkgP2Tgpe8xtp98khPmAVZF5Vk",
+  "address": "NDRAKc9KJzfX2ymdJQ7Ad3sr4FSdP7wixVoTVTWt7hU",
   "metadata": {
     "name": "smartContracts",
     "version": "0.1.0",
@@ -627,23 +627,63 @@ export type SmartContracts = {
   "errors": [
     {
       "code": 6000,
-      "name": "inputTooLarge",
-      "msg": "Input data too large."
+      "name": "invalidTaskId",
+      "msg": "Task ID must be non-zero."
     },
     {
       "code": 6001,
+      "name": "invalidReward",
+      "msg": "Reward per response must be greater than zero."
+    },
+    {
+      "code": 6002,
+      "name": "invalidMaxResponses",
+      "msg": "Max responses must be greater than zero."
+    },
+    {
+      "code": 6003,
+      "name": "invalidDeadline",
+      "msg": "Deadline must be in the future."
+    },
+    {
+      "code": 6004,
+      "name": "invalidCid",
+      "msg": "CID cannot be empty."
+    },
+    {
+      "code": 6005,
+      "name": "invalidCreator",
+      "msg": "Invalid creator."
+    },
+    {
+      "code": 6006,
       "name": "taskAlreadyComplete",
       "msg": "Task already marked complete."
     },
     {
-      "code": 6002,
-      "name": "notEnoughResponses",
-      "msg": "Not enough valid responses yet."
+      "code": 6007,
+      "name": "deadlinePassed",
+      "msg": "Deadline has already passed."
     },
     {
-      "code": 6003,
+      "code": 6008,
+      "name": "maxResponsesReached",
+      "msg": "Max responses reached."
+    },
+    {
+      "code": 6009,
       "name": "responseAlreadyExists",
       "msg": "Response already exists."
+    },
+    {
+      "code": 6010,
+      "name": "unauthorized",
+      "msg": "unauthorized"
+    },
+    {
+      "code": 6011,
+      "name": "notEnoughResponses",
+      "msg": "Not enough responses yet"
     }
   ],
   "types": [

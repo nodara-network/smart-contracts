@@ -94,6 +94,7 @@ describe("nodara - submit_response", () => {
           adminAccount: adminAccountPDA,
         })
         .rpc();
+      console.log("Should have failed: deadline passed");
       assert.fail("Should have failed: deadline passed");
     } catch (err) {
       expect(err.error.errorCode.code).to.equal("DeadlinePassed");
