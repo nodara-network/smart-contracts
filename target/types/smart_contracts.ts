@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/smart_contracts.json`.
  */
 export type SmartContracts = {
-  "address": "Afja4Q8urL5j8Hn3PpCkgP2Tgpe8xtp98khPmAVZF5Vk",
+  "address": "NDRAKc9KJzfX2ymdJQ7Ad3sr4FSdP7wixVoTVTWt7hU",
   "metadata": {
     "name": "smartContracts",
     "version": "0.1.0",

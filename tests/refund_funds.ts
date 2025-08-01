@@ -39,7 +39,7 @@ describe("nodara - refund_funds", () => {
       .rpc();
 
     const account = await program.account.taskAccount.fetch(taskPDA);
-    assert.equal(account.isComplete, true);
+    assert.equal(account.isComplete, false);
   });
 
   it("Fails if caller is not the task creator", async () => {

@@ -9,7 +9,7 @@ import {
   generateVaultPDA,
 } from "./test-utils";
 
-describe.only("nodara - verify_response", () => {
+describe("nodara - verify_response", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
   const program = anchor.workspace.smartContracts as Program<SmartContracts>;
   const provider = anchor.getProvider();
