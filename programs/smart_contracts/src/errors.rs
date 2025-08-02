@@ -49,6 +49,15 @@ pub enum TaskError {
 
     #[msg("Not enough responses yet")]
     NotEnoughResponses,
+
+    #[msg("Cannot cancel task with responses unless deadline passed")]
+    InvalidCancellation,
+
+    #[msg("Response already verified")]
+    ResponseAlreadyVerified,
+
+    #[msg("Not enough verified responses to complete task")]
+    NotEnoughVerifiedResponses,
 }
 
 #[error_code]
@@ -61,6 +70,15 @@ pub enum RewardError {
 
     #[msg("Vault does not have enough balance.")]
     InsufficientVaultBalance,
+
+    #[msg("Task must be completed before disbursing rewards")]
+    TaskNotComplete,
+
+    #[msg("Response must be verified before receiving rewards")]
+    ResponseNotVerified,
+
+    #[msg("Reward amount exceeds the reward per response")]
+    ExcessiveRewardAmount,
 }
 
 #[error_code]

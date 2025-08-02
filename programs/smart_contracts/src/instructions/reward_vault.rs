@@ -1,7 +1,7 @@
 use crate::{
     errors::{RewardError, TaskError},
     states::{reward_accounts::*, task_accounts::*},
-    AdminAccount,
+    AdminAccount, ResponseAccount,
 };
 use anchor_lang::{
     prelude::*,
@@ -176,7 +176,10 @@ impl<'info> RefundRemaining<'info> {
 
 #[derive(Accounts)]
 pub struct DisburseRewards<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = task_account.is_complete @ TaskError::TaskAlreadyComplete
+    )]
     pub task_account: Account<'info, TaskAccount>,
 
     #[account(
@@ -186,25 +189,61 @@ pub struct DisburseRewards<'info> {
     )]
     pub reward_vault: Account<'info, RewardVaultAccount>,
 
+    // Response account to verify the recipient earned rewards
+    #[account(
+        seeds = [b"response", task_account.key().as_ref(), recipient.key().as_ref()],
+        bump = response_account.bump,
+        constraint = response_account.is_verified @ TaskError::Unauthorized
+    )]
+    pub response_account: Account<'info, ResponseAccount>,
+
     #[account(mut)]
     pub recipient: SystemAccount<'info>,
+
+    // Admin authorization
+    #[account(
+        seeds = [b"admin"],
+        bump = admin_account.bump
+    )]
+    pub admin_account: Account<'info, AdminAccount>,
+
+    #[account(
+        constraint = signer.key() == admin_account.authority @ TaskError::Unauthorized
+    )]
+    pub signer: Signer<'info>,
 }
 
 impl<'info> DisburseRewards<'info> {
-    pub fn disburse_rewards(&mut self, amount: u64) -> Result<()> {
+    pub fn disburse_rewards(&mut self) -> Result<()> {
         let vault = &mut self.reward_vault;
+        let task = &self.task_account;
+
+        // Calculate reward amount automatically
+        let reward_amount = task.reward_per_response;
 
         require!(
-            vault.balance >= amount,
+            vault.balance >= reward_amount,
             RewardError::InsufficientVaultBalance
         );
 
-        // TODO: Require signer to be MagicBlock delegate before disbursing
+        require!(task.is_complete, TaskError::TaskAlreadyComplete);
 
-        **self.recipient.try_borrow_mut_lamports()? += amount;
-        **vault.to_account_info().try_borrow_mut_lamports()? -= amount;
+        require!(self.response_account.is_verified, TaskError::Unauthorized);
 
-        vault.balance -= amount;
+        // Transfer reward to recipient
+        **self.recipient.try_borrow_mut_lamports()? += reward_amount;
+        **vault.to_account_info().try_borrow_mut_lamports()? -= reward_amount;
+
+        vault.balance = vault
+            .balance
+            .checked_sub(reward_amount)
+            .ok_or(RewardError::InsufficientVaultBalance)?;
+
+        msg!(
+            "Disbursed {} lamports to {} for verified response",
+            reward_amount,
+            self.recipient.key()
+        );
 
         Ok(())
     }

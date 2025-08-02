@@ -1,5 +1,5 @@
 {
-  "address": "NDRAKc9KJzfX2ymdJQ7Ad3sr4FSdP7wixVoTVTWt7hU",
+  "address": "7MaK7mqDaJE1NRD7BRSBTHYLhQau2WLaVaunzpNxzjAS",
   "metadata": {
     "name": "smart_contracts",
     "version": "0.1.0",
@@ -221,16 +221,60 @@
           }
         },
         {
+          "name": "response_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  115,
+                  112,
+                  111,
+                  110,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "task_account"
+              },
+              {
+                "kind": "account",
+                "path": "recipient"
+              }
+            ]
+          }
+        },
+        {
           "name": "recipient",
           "writable": true
+        },
+        {
+          "name": "admin_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "signer": true
         }
       ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
+      "args": []
     },
     {
       "name": "init_admin",
@@ -678,6 +722,21 @@
       "code": 6011,
       "name": "NotEnoughResponses",
       "msg": "Not enough responses yet"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidCancellation",
+      "msg": "Cannot cancel task with responses unless deadline passed"
+    },
+    {
+      "code": 6013,
+      "name": "ResponseAlreadyVerified",
+      "msg": "Response already verified"
+    },
+    {
+      "code": 6014,
+      "name": "NotEnoughVerifiedResponses",
+      "msg": "Not enough verified responses to complete task"
     }
   ],
   "types": [

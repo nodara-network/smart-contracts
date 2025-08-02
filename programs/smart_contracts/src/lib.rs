@@ -57,7 +57,7 @@ pub mod smart_contracts {
     }
 
     // LEFT
-    pub fn disburse_rewards(ctx: Context<DisburseRewards>, amount: u64) -> Result<()> {
-        ctx.accounts.disburse_rewards(amount)
+    pub fn disburse_rewards(ctx: Context<DisburseRewards>) -> Result<()> {
+        ctx.accounts.disburse_rewards()
     }
 }

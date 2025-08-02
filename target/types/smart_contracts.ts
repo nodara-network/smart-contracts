@@ -227,16 +227,60 @@ export type SmartContracts = {
           }
         },
         {
+          "name": "responseAccount",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  115,
+                  112,
+                  111,
+                  110,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "taskAccount"
+              },
+              {
+                "kind": "account",
+                "path": "recipient"
+              }
+            ]
+          }
+        },
+        {
           "name": "recipient",
           "writable": true
+        },
+        {
+          "name": "adminAccount",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer",
+          "signer": true
         }
       ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
+      "args": []
     },
     {
       "name": "initAdmin",
@@ -684,6 +728,21 @@ export type SmartContracts = {
       "code": 6011,
       "name": "notEnoughResponses",
       "msg": "Not enough responses yet"
+    },
+    {
+      "code": 6012,
+      "name": "invalidCancellation",
+      "msg": "Cannot cancel task with responses unless deadline passed"
+    },
+    {
+      "code": 6013,
+      "name": "responseAlreadyVerified",
+      "msg": "Response already verified"
+    },
+    {
+      "code": 6014,
+      "name": "notEnoughVerifiedResponses",
+      "msg": "Not enough verified responses to complete task"
     }
   ],
   "types": [
