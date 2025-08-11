@@ -29,7 +29,7 @@ describe("nodara - deposit_funds", () => {
       adminAuthority,
     }).rpc();
 
-    const account = await program.account.rewardVaultAccount.fetch(vaultPDA);
+    const account = await program.account.rewardVault.fetch(vaultPDA);
     const expected = getExpectedNet(depositAmount);
     assert.equal(account.balance.toNumber(), expected);
   });
@@ -51,7 +51,7 @@ describe("nodara - deposit_funds", () => {
       }).rpc();
     }
 
-    const account = await program.account.rewardVaultAccount.fetch(vaultPDA);
+    const account = await program.account.rewardVault.fetch(vaultPDA);
     const expectedTotal = amounts.map(getExpectedNet).reduce((a, b) => a + b, 0);
     assert.equal(account.balance.toNumber(), expectedTotal);
   });
@@ -145,7 +145,7 @@ describe("nodara - deposit_funds", () => {
       adminAuthority,
     }).rpc();
 
-    const account = await program.account.rewardVaultAccount.fetch(vaultPDA);
+    const account = await program.account.rewardVault.fetch(vaultPDA);
     const expected = getExpectedNet(smallAmount);
     assert.equal(account.balance.toNumber(), expected);
   });

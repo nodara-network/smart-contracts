@@ -35,11 +35,11 @@ describe("nodara - cancel_task", () => {
       .rpc();
 
     const rent = await provider.connection.getMinimumBalanceForRentExemption(
-      program.account.rewardVaultAccount.size
+      program.account.rewardVault.size
     );
 
     const vaultBalance = await provider.connection.getBalance(vaultPDA);
-    const account = await program.account.rewardVaultAccount.fetch(vaultPDA);
+    const account = await program.account.rewardVault.fetch(vaultPDA);
 
     const fees = calculateFees(depositAmount);
     assert.equal(vaultBalance, depositAmount.toNumber() - fees + rent);
@@ -81,7 +81,7 @@ describe("nodara - cancel_task", () => {
       })
       .rpc();
 
-    const account = await program.account.rewardVaultAccount.fetch(vaultPDA);
+    const account = await program.account.rewardVault.fetch(vaultPDA);
     const totalExpectedBalance = firstNetDeposit + secondNetDeposit;
 
     assert.equal(account.balance.toNumber(), totalExpectedBalance);

@@ -707,6 +707,19 @@
       ]
     },
     {
+      "name": "RewardVault",
+      "discriminator": [
+        201,
+        22,
+        221,
+        167,
+        208,
+        16,
+        210,
+        33
+      ]
+    },
+    {
       "name": "TaskAccount",
       "discriminator": [
         235,
@@ -717,19 +730,6 @@
         60,
         170,
         203
-      ]
-    },
-    {
-      "name": "Treasury",
-      "discriminator": [
-        238,
-        239,
-        123,
-        238,
-        89,
-        1,
-        168,
-        253
       ]
     }
   ],
@@ -860,6 +860,26 @@
       }
     },
     {
+      "name": "RewardVault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "task_bump",
+            "type": "u8"
+          },
+          {
+            "name": "balance",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "TaskAccount",
       "type": {
         "kind": "struct",
@@ -899,26 +919,6 @@
           {
             "name": "cid",
             "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "Treasury",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "task_bump",
-            "type": "u8"
-          },
-          {
-            "name": "balance",
-            "type": "u64"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }

@@ -167,7 +167,7 @@ describe("nodara - disburse_rewards", () => {
       const initialRecipientBalance = await provider.connection.getBalance(
         responder.publicKey
       );
-      const initialVault = await program.account.rewardVaultAccount.fetch(
+      const initialVault = await program.account.rewardVault.fetch(
         vaultPDA
       );
 
@@ -188,7 +188,7 @@ describe("nodara - disburse_rewards", () => {
       const finalRecipientBalance = await provider.connection.getBalance(
         responder.publicKey
       );
-      const finalVault = await program.account.rewardVaultAccount.fetch(
+      const finalVault = await program.account.rewardVault.fetch(
         vaultPDA
       );
 
@@ -210,7 +210,7 @@ describe("nodara - disburse_rewards", () => {
         await createTaskWithVerifiedResponses(3);
 
       const initialVaultBalance = (
-        await program.account.rewardVaultAccount.fetch(vaultPDA)
+        await program.account.rewardVault.fetch(vaultPDA)
       ).balance.toNumber();
 
       // Disburse to each responder
@@ -247,7 +247,7 @@ describe("nodara - disburse_rewards", () => {
 
       // Check final vault balance
       const finalVaultBalance = (
-        await program.account.rewardVaultAccount.fetch(vaultPDA)
+        await program.account.rewardVault.fetch(vaultPDA)
       ).balance.toNumber();
 
       assert.equal(

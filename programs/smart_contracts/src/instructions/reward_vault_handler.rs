@@ -1,6 +1,6 @@
 use crate::{
     errors::{RewardError, TaskError},
-    states::{Treasury, TaskAccount, AdminAccount, ResponseAccount}
+    states::{RewardVault, TaskAccount, AdminAccount, ResponseAccount}
 };
 use anchor_lang::{
     prelude::*,
@@ -22,9 +22,9 @@ pub struct DepositFunds<'info> {
         seeds = [b"vault", task_account.key().as_ref()],
         bump,
         payer = creator,
-        space = 8 + Treasury::INIT_SPACE
+        space = 8 + RewardVault::INIT_SPACE
     )]
-    pub reward_vault: Account<'info, Treasury>,
+    pub reward_vault: Account<'info, RewardVault>,
 
     #[account(
         mut,
@@ -119,7 +119,7 @@ impl<'info> DepositFunds<'info> {
                 RewardError::TransferFailed
             })?;
 
-        self.reward_vault.set_inner(Treasury {
+        self.reward_vault.set_inner(RewardVault {
             task_bump: bumps.task_account,
             balance: vault_balance,
             bump: bumps.reward_vault,
@@ -145,7 +145,7 @@ pub struct RefundRemaining<'info> {
         bump = reward_vault.bump,
         close = creator
     )]
-    pub reward_vault: Account<'info, Treasury>,
+    pub reward_vault: Account<'info, RewardVault>,
 
     #[account(mut)]
     pub creator: Signer<'info>,
@@ -186,7 +186,7 @@ pub struct DisburseRewards<'info> {
         seeds = [b"vault", task_account.key().as_ref()],
         bump = reward_vault.bump
     )]
-    pub reward_vault: Account<'info, Treasury>,
+    pub reward_vault: Account<'info, RewardVault>,
 
     // Response account to verify the recipient earned rewards
     #[account(

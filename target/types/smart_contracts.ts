@@ -713,6 +713,19 @@ export type SmartContracts = {
       ]
     },
     {
+      "name": "rewardVault",
+      "discriminator": [
+        201,
+        22,
+        221,
+        167,
+        208,
+        16,
+        210,
+        33
+      ]
+    },
+    {
       "name": "taskAccount",
       "discriminator": [
         235,
@@ -723,19 +736,6 @@ export type SmartContracts = {
         60,
         170,
         203
-      ]
-    },
-    {
-      "name": "treasury",
-      "discriminator": [
-        238,
-        239,
-        123,
-        238,
-        89,
-        1,
-        168,
-        253
       ]
     }
   ],
@@ -866,6 +866,26 @@ export type SmartContracts = {
       }
     },
     {
+      "name": "rewardVault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "taskBump",
+            "type": "u8"
+          },
+          {
+            "name": "balance",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "taskAccount",
       "type": {
         "kind": "struct",
@@ -905,26 +925,6 @@ export type SmartContracts = {
           {
             "name": "cid",
             "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "treasury",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "taskBump",
-            "type": "u8"
-          },
-          {
-            "name": "balance",
-            "type": "u64"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }
