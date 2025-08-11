@@ -1,7 +1,7 @@
 #![allow(unexpected_cfgs)]
 use anchor_lang::prelude::*;
 
-declare_id!("NDRAKc9KJzfX2ymdJQ7Ad3sr4FSdP7wixVoTVTWt7hU");
+declare_id!("NDRNySXFhPVKUmSPkxwm92u2KD9qPEeaN8poUSW2LNQ");
 
 pub mod constants;
 pub mod errors;
@@ -36,6 +36,23 @@ pub mod smart_contracts {
             ctx.bumps,
         )
     }
+    pub fn update_task(
+        ctx: Context<UpdateTask>,
+        task_id: u64,
+        reward_per_response: u64,
+        max_responses: u16,
+        deadline: i64,
+        cid: String,
+    ) -> Result<()> {
+        ctx.accounts.update_task(
+            task_id,
+            reward_per_response,
+            max_responses,
+            deadline,
+            cid
+        )
+    }
+
     pub fn deposit_funds(ctx: Context<DepositFunds>, task_id: u64, amount: u64) -> Result<()> {
         ctx.accounts.deposit_funds(task_id, amount, ctx.bumps)
     }

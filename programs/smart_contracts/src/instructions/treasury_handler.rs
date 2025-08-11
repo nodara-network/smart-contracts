@@ -1,7 +1,6 @@
 use crate::{
     errors::{RewardError, TaskError},
-    states::{reward_accounts::*, task_accounts::*},
-    AdminAccount, ResponseAccount,
+    states::{Treasury, TaskAccount, AdminAccount, ResponseAccount}
 };
 use anchor_lang::{
     prelude::*,
@@ -23,9 +22,9 @@ pub struct DepositFunds<'info> {
         seeds = [b"vault", task_account.key().as_ref()],
         bump,
         payer = creator,
-        space = 8 + RewardVaultAccount::INIT_SPACE
+        space = 8 + Treasury::INIT_SPACE
     )]
-    pub reward_vault: Account<'info, RewardVaultAccount>,
+    pub reward_vault: Account<'info, Treasury>,
 
     #[account(
         mut,
@@ -120,7 +119,7 @@ impl<'info> DepositFunds<'info> {
                 RewardError::TransferFailed
             })?;
 
-        self.reward_vault.set_inner(RewardVaultAccount {
+        self.reward_vault.set_inner(Treasury {
             task_bump: bumps.task_account,
             balance: vault_balance,
             bump: bumps.reward_vault,
@@ -136,7 +135,7 @@ pub struct RefundRemaining<'info> {
         mut,
         has_one = creator,
         seeds = [b"task", creator.key().as_ref(), task_account.task_id.to_le_bytes().as_ref()],
-        bump = task_account.bump,
+        bump = task_account.task_bump,
     )]
     pub task_account: Account<'info, TaskAccount>,
 
@@ -146,7 +145,7 @@ pub struct RefundRemaining<'info> {
         bump = reward_vault.bump,
         close = creator
     )]
-    pub reward_vault: Account<'info, RewardVaultAccount>,
+    pub reward_vault: Account<'info, Treasury>,
 
     #[account(mut)]
     pub creator: Signer<'info>,
@@ -187,7 +186,7 @@ pub struct DisburseRewards<'info> {
         seeds = [b"vault", task_account.key().as_ref()],
         bump = reward_vault.bump
     )]
-    pub reward_vault: Account<'info, RewardVaultAccount>,
+    pub reward_vault: Account<'info, Treasury>,
 
     // Response account to verify the recipient earned rewards
     #[account(

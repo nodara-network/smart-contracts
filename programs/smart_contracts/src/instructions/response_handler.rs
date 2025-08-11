@@ -1,6 +1,6 @@
 use crate::{
     errors::TaskError,
-    states::{response_accounts::*, task_accounts::*},
+    states::{ResponseAccount, TaskAccount},
     AdminAccount,
 };
 use anchor_lang::prelude::*;
@@ -10,7 +10,7 @@ pub struct SubmitResponse<'info> {
     #[account(
         mut,
         seeds = [b"task", task_account.creator.as_ref(), &task_account.task_id.to_le_bytes()],
-        bump = task_account.bump
+        bump = task_account.task_bump
     )]
     pub task_account: Account<'info, TaskAccount>,
 
@@ -56,7 +56,7 @@ impl<'info> SubmitResponse<'info> {
         );
 
         self.response_account.set_inner(ResponseAccount {
-            task_bump: self.task_account.bump,
+            task_bump: self.task_account.task_bump,
             responder: self.responder.key(),
             cid,
             timestamp: Clock::get()?.unix_timestamp,

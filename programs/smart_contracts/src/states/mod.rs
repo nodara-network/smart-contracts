@@ -1,9 +1,11 @@
-pub mod response_accounts;
-pub mod reward_accounts;
-pub mod task_accounts;
-pub mod admin_account;
+pub mod admin;
+pub mod responder;
+pub mod response;
+pub mod treasury;
+pub mod task;
 
-pub use response_accounts::*;
-pub use reward_accounts::*;
-pub use task_accounts::*;
-pub use admin_account::*;
+pub use admin::*;
+pub use responder::*;
+pub use response::*;
+pub use treasury::*;
+pub use task::*;

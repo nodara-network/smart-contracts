@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/smart_contracts.json`.
  */
 export type SmartContracts = {
-  "address": "NDRAKc9KJzfX2ymdJQ7Ad3sr4FSdP7wixVoTVTWt7hU",
+  "address": "NDRNySXFhPVKUmSPkxwm92u2KD9qPEeaN8poUSW2LNQ",
   "metadata": {
     "name": "smartContracts",
     "version": "0.1.0",
@@ -572,6 +572,77 @@ export type SmartContracts = {
       ]
     },
     {
+      "name": "updateTask",
+      "discriminator": [
+        100,
+        51,
+        124,
+        168,
+        211,
+        208,
+        42,
+        228
+      ],
+      "accounts": [
+        {
+          "name": "taskAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  97,
+                  115,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "arg",
+                "path": "taskId"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "taskId",
+          "type": "u64"
+        },
+        {
+          "name": "rewardPerResponse",
+          "type": "u64"
+        },
+        {
+          "name": "maxResponses",
+          "type": "u16"
+        },
+        {
+          "name": "deadline",
+          "type": "i64"
+        },
+        {
+          "name": "cid",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "verifyResponse",
       "discriminator": [
         205,
@@ -642,19 +713,6 @@ export type SmartContracts = {
       ]
     },
     {
-      "name": "rewardVaultAccount",
-      "discriminator": [
-        58,
-        86,
-        0,
-        57,
-        129,
-        40,
-        21,
-        47
-      ]
-    },
-    {
       "name": "taskAccount",
       "discriminator": [
         235,
@@ -666,83 +724,51 @@ export type SmartContracts = {
         170,
         203
       ]
+    },
+    {
+      "name": "treasury",
+      "discriminator": [
+        238,
+        239,
+        123,
+        238,
+        89,
+        1,
+        168,
+        253
+      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "invalidTaskId",
-      "msg": "Task ID must be non-zero."
+      "name": "transferFailed",
+      "msg": "Failed to transfer lamports"
     },
     {
       "code": 6001,
-      "name": "invalidReward",
-      "msg": "Reward per response must be greater than zero."
+      "name": "invalidDepositAmount",
+      "msg": "Invalid deposit amount"
     },
     {
       "code": 6002,
-      "name": "invalidMaxResponses",
-      "msg": "Max responses must be greater than zero."
+      "name": "insufficientVaultBalance",
+      "msg": "Vault does not have enough balance."
     },
     {
       "code": 6003,
-      "name": "invalidDeadline",
-      "msg": "Deadline must be in the future."
+      "name": "taskNotComplete",
+      "msg": "Task must be completed before disbursing rewards"
     },
     {
       "code": 6004,
-      "name": "invalidCid",
-      "msg": "CID cannot be empty."
+      "name": "responseNotVerified",
+      "msg": "Response must be verified before receiving rewards"
     },
     {
       "code": 6005,
-      "name": "invalidCreator",
-      "msg": "Invalid creator."
-    },
-    {
-      "code": 6006,
-      "name": "taskAlreadyComplete",
-      "msg": "Task already marked complete."
-    },
-    {
-      "code": 6007,
-      "name": "deadlinePassed",
-      "msg": "Deadline has already passed."
-    },
-    {
-      "code": 6008,
-      "name": "maxResponsesReached",
-      "msg": "Max responses reached."
-    },
-    {
-      "code": 6009,
-      "name": "responseAlreadyExists",
-      "msg": "Response already exists."
-    },
-    {
-      "code": 6010,
-      "name": "unauthorized",
-      "msg": "unauthorized"
-    },
-    {
-      "code": 6011,
-      "name": "notEnoughResponses",
-      "msg": "Not enough responses yet"
-    },
-    {
-      "code": 6012,
-      "name": "invalidCancellation",
-      "msg": "Cannot cancel task with responses unless deadline passed"
-    },
-    {
-      "code": 6013,
-      "name": "responseAlreadyVerified",
-      "msg": "Response already verified"
-    },
-    {
-      "code": 6014,
-      "name": "notEnoughVerifiedResponses",
-      "msg": "Not enough verified responses to complete task"
+      "name": "excessiveRewardAmount",
+      "msg": "Reward amount exceeds the reward per response"
     }
   ],
   "types": [
@@ -795,26 +821,6 @@ export type SmartContracts = {
       }
     },
     {
-      "name": "rewardVaultAccount",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "taskBump",
-            "type": "u8"
-          },
-          {
-            "name": "balance",
-            "type": "u64"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
       "name": "taskAccount",
       "type": {
         "kind": "struct",
@@ -848,12 +854,32 @@ export type SmartContracts = {
             "type": "bool"
           },
           {
-            "name": "bump",
+            "name": "taskBump",
             "type": "u8"
           },
           {
             "name": "cid",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "treasury",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "taskBump",
+            "type": "u8"
+          },
+          {
+            "name": "balance",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
