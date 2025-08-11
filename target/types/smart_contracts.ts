@@ -742,33 +742,78 @@ export type SmartContracts = {
   "errors": [
     {
       "code": 6000,
-      "name": "transferFailed",
-      "msg": "Failed to transfer lamports"
+      "name": "invalidTaskId",
+      "msg": "Task ID must be non-zero."
     },
     {
       "code": 6001,
-      "name": "invalidDepositAmount",
-      "msg": "Invalid deposit amount"
+      "name": "invalidReward",
+      "msg": "Reward per response must be greater than zero."
     },
     {
       "code": 6002,
-      "name": "insufficientVaultBalance",
-      "msg": "Vault does not have enough balance."
+      "name": "invalidMaxResponses",
+      "msg": "Max responses must be greater than zero."
     },
     {
       "code": 6003,
-      "name": "taskNotComplete",
-      "msg": "Task must be completed before disbursing rewards"
+      "name": "invalidDeadline",
+      "msg": "Deadline must be in the future."
     },
     {
       "code": 6004,
-      "name": "responseNotVerified",
-      "msg": "Response must be verified before receiving rewards"
+      "name": "invalidCid",
+      "msg": "CID cannot be empty."
     },
     {
       "code": 6005,
-      "name": "excessiveRewardAmount",
-      "msg": "Reward amount exceeds the reward per response"
+      "name": "invalidCreator",
+      "msg": "Invalid creator."
+    },
+    {
+      "code": 6006,
+      "name": "taskAlreadyComplete",
+      "msg": "Task already marked complete."
+    },
+    {
+      "code": 6007,
+      "name": "deadlinePassed",
+      "msg": "Deadline has already passed."
+    },
+    {
+      "code": 6008,
+      "name": "maxResponsesReached",
+      "msg": "Max responses reached."
+    },
+    {
+      "code": 6009,
+      "name": "responseAlreadyExists",
+      "msg": "Response already exists."
+    },
+    {
+      "code": 6010,
+      "name": "unauthorized",
+      "msg": "unauthorized"
+    },
+    {
+      "code": 6011,
+      "name": "notEnoughResponses",
+      "msg": "Not enough responses yet"
+    },
+    {
+      "code": 6012,
+      "name": "invalidCancellation",
+      "msg": "Cannot cancel task with responses unless deadline passed"
+    },
+    {
+      "code": 6013,
+      "name": "responseAlreadyVerified",
+      "msg": "Response already verified"
+    },
+    {
+      "code": 6014,
+      "name": "notEnoughVerifiedResponses",
+      "msg": "Not enough verified responses to complete task"
     }
   ],
   "types": [
